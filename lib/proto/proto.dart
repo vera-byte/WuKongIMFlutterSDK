@@ -180,7 +180,7 @@ Uint8List encodeSend(SendPacket packet) {
   if (packet.setting.stream == 1) {
     write.writeString(packet.streamNo);
   }
-  write.writeString(packet.channelID);
+  write.writeString(packet.channelId);
   write.writeUint8(packet.channelType);
   if (WKIMCore.shared.options.protoVersion >= 3) {
     write.writeUint32(packet.expire);
@@ -216,7 +216,7 @@ RecvPacket decodeRecv(PacketHeader header, ReadData reader) {
   recv.setting = Setting().decode(setting);
   recv.msgKey = reader.readString();
   recv.fromUID = reader.readString();
-  recv.channelID = reader.readString();
+  recv.channelId = reader.readString();
   recv.channelType = reader.readUint8().toInt();
   if (WKIMCore.shared.options.protoVersion >= 3) {
     recv.expire = reader.readUint32().toInt();

@@ -1,8 +1,8 @@
 // WebSocket 连接管理核心
 import 'dart:async';
+import 'dart:io';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:wkim_flutter_sdk/common/logs.dart';
-import 'package:wkim_flutter_sdk/type/const.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -23,16 +23,21 @@ class ConnectionManager {
   WebSocketChannel? ws; // WebSocket 通道
   final int reconnMilliseconds = 1500; // 重连间隔时间
   Timer? heartTimer; // 心跳定时器
+  Timer? checkNetworkTimer;
 
   final heartIntervalSecond = const Duration(seconds: 60); // 心跳间隔
+  final checkNetworkSecond = const Duration(seconds: 1);
   final Connectivity _connectivity = Connectivity();
 
   /// 连接服务器（通常用于首次连接或重新连接）
-  void connect() {
-    String uri = WKIMCore.shared.options.addr ?? "";
-    Logs.info("开始连接：$uri"); // 记录连接开始日志
+  Future<void> connect() async {
+    Uri uri = Uri.parse(WKIMCore.shared.options.addr ?? "");
     try {
-      ws = WebSocketChannel.connect(Uri.parse(uri)); // 连接 WebSocket
+      if (uri.host == "") {
+        throw Exception("连接地址无效");
+      }
+      Logs.info("开始连接：$uri"); // 记录连接开始日志
+      ws = WebSocketChannel.connect(uri); // 连接 WebSocket
       Logs.info("连接成功"); // 记录连接成功日志
       /// 发送连接数据包
       _wk.packetSenderManage.sendConnectPacket();
@@ -45,6 +50,7 @@ class ConnectionManager {
 
       /// 处理连接错误
       _handleError();
+      rethrow;
     }
   }
 
@@ -94,29 +100,60 @@ class ConnectionManager {
   }
 
   /// 开始网络检查
-  startCheckNetwork() {
-    _connectivity.onConnectivityChanged.listen((value) {
-      if (value.contains(ConnectivityResult.none)) {
-        isReconnection = true;
-        isNetworkUnavailable = true;
-        Logs.debug('网络断开了');
-        // _checkSedingMsg();
-        _wk.statusManage.updateStatus(WKConnectStatus.noNetwork);
-        lastConnectivityResult = ConnectivityResult.none;
+  startCheckNetworkTimer() {
+    _stopCheckNetworkTimer();
+    _checkInternetAccess().then((publicNetwork) {
+      if (publicNetwork) {
+        Logs.info("网络连接测试正常");
       } else {
-        isNetworkUnavailable = false;
-        if (lastConnectivityResult != null && !value.contains(lastConnectivityResult)) {
-          isReconnection = true;
-        }
-        if (isReconnection) {
-          isReconnection = false;
-          connect();
-        }
-      }
-      if (value.isNotEmpty) {
-        lastConnectivityResult = value[0];
+        Logs.error("网络连接不通,请检查网络！");
       }
     });
+    checkNetworkTimer = Timer.periodic(checkNetworkSecond, (timer) {
+      var connectivityResult = _connectivity.checkConnectivity();
+      connectivityResult.then((value) {
+        if (value.contains(ConnectivityResult.none)) {
+          isReconnection = true;
+          isNetworkUnavailable = true;
+          Logs.debug('网络断开了');
+          // _checkSedingMsg();
+          // setConnectionStatus(WKConnectStatus.noNetwork);
+          lastConnectivityResult = ConnectivityResult.none;
+        } else {
+          isNetworkUnavailable = false;
+          if (lastConnectivityResult != null && !value.contains(lastConnectivityResult)) {
+            isReconnection = true;
+          }
+          if (isReconnection) {
+            isReconnection = false;
+            connect();
+          }
+        }
+        if (value.isNotEmpty) {
+          lastConnectivityResult = value[0];
+        }
+      });
+    });
+  }
+
+  /// 停止网络状态检查
+  _stopCheckNetworkTimer() {
+    if (checkNetworkTimer != null) {
+      checkNetworkTimer!.cancel();
+      checkNetworkTimer = null;
+    }
+  }
+
+  /// 检查网络是否能够访问互联网
+  Future<bool> _checkInternetAccess() async {
+    try {
+      final lastest = "${WKIMCore.shared.options.addr}".split("//").last;
+      Logs.debug("通过[$lastest]互联网网络连通测试...");
+      final result = await InternetAddress.lookup(lastest[1]);
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// 处理 WebSocket 连接错误

@@ -9,9 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # 数据库
-  isar: 3.1.0+1
-  isar_flutter_libs: 3.1.0+1
+
   # 日志
   logger: 2.5.0
   cupertino_icons: ^1.0.6
@@ -31,7 +29,6 @@ dependencies:
   connectivity_plus: 6.1.2
   # KV存储
   shared_preferences: 2.2.2
-  sqflite: ^2.3.3+1
   json_annotation: any
   freezed_annotation: any
 
@@ -40,9 +37,6 @@ dev_dependencies:
     sdk: flutter
   freezed: any
   flutter_lints: ^3.0.0
-  isar_generator: 3.1.0+1
-  json_serializable: any
-  build_runner:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

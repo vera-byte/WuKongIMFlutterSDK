@@ -2,6 +2,7 @@
 
 // import 'handlers/pong_handler.dart';
 
+import 'package:wkim_flutter_sdk/common/logs.dart';
 import 'package:wkim_flutter_sdk/core/handlers/conn_ack_handler.dart';
 import 'package:wkim_flutter_sdk/core/handlers/disconnect_handler.dart';
 import 'package:wkim_flutter_sdk/core/handlers/recv_handler.dart';
@@ -22,6 +23,7 @@ class PacketHandlerRegistry {
   static PacketHandler? get(PacketType type) => _handlers[type];
 
   static void registerDefaultHandlers() {
+    Logs.debug("注册解码器");
     register(PacketType.connack, ConnAckPacketHandler());
     register(PacketType.recv, RecvPacketHandler());
     register(PacketType.sendack, SendAckPacketHandler());

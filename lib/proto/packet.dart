@@ -66,7 +66,7 @@ class SendPacket extends Packet {
   int clientSeq;
   String clientMsgNO;
   String streamNo = "";
-  String channelID;
+  String channelId;
   int channelType;
   String? topic;
   String payload = '';
@@ -74,7 +74,7 @@ class SendPacket extends Packet {
   SendPacket({
     this.clientSeq = 0,
     this.clientMsgNO = "",
-    this.channelID = "",
+    this.channelId = "",
     this.channelType = 1,
     this.topic = "",
   }) {
@@ -86,7 +86,7 @@ class SendPacket extends Packet {
     StringBuffer sb = StringBuffer();
     sb.write(clientSeq);
     sb.write(clientMsgNO);
-    sb.write(channelID);
+    sb.write(channelId);
     sb.write(channelType);
     sb.write(content);
     String msgKey = CryptoUtils.aesEncrypt(sb.toString());
@@ -114,7 +114,7 @@ class RecvPacket extends Packet {
   Setting setting = Setting();
   String msgKey = "";
   String fromUID = "";
-  String channelID = "";
+  String channelId = "";
   int channelType = 0;
   String clientMsgNO = "";
   String streamNo = "";
@@ -128,7 +128,7 @@ class RecvPacket extends Packet {
   int expire = 0;
   @override
   String toString() {
-    return "msgkey：$msgKey，chanenlID：$channelID，channelType：$channelType，fromUID：$fromUID，clientMsgNO：$clientMsgNO，messageID：$messageID，messageSeq：$messageSeq，messageTime：$messageTime，payload：$payload";
+    return "msgkey：$msgKey，chanenlID：$channelId，channelType：$channelType，fromUID：$fromUID，clientMsgNO：$clientMsgNO，messageID：$messageID，messageSeq：$messageSeq，messageTime：$messageTime，payload：$payload";
   }
 }
 

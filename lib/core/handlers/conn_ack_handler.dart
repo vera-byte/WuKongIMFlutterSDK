@@ -37,7 +37,7 @@ class ConnAckPacketHandler implements PacketHandler<ConnAckPacket> {
       _wk.connectionManager.startHeartTimer();
 
       /// 网络检查
-      _wk.connectionManager.startCheckNetwork();
+      _wk.connectionManager.startCheckNetworkTimer();
     } else {
       // setConnectionStatus(WKConnectStatus.fail, reasoncode: packet.reasonCode);
       Logs.debug('连接失败！错误->${packet.reasonCode}');

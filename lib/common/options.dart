@@ -1,3 +1,5 @@
+import 'package:wkim_flutter_sdk/common/logs.dart';
+
 import '../proto/proto.dart';
 
 class WKIMOptions {
@@ -6,10 +8,9 @@ class WKIMOptions {
   int protoVersion = 0x04;
   int deviceFlag = 0;
   bool debug = true;
+  LogerLevel logerLevel = LogerLevel.debug;
   String deviceID = "";
   Function(Function(String addr) complete)? getAddr;
   Proto proto = Proto();
-  WKIMOptions();
-
-  WKIMOptions.setOpt(this.uid, this.token, {this.addr});
+  WKIMOptions(this.uid, this.token, {this.addr});
 }

@@ -1,3 +1,81 @@
+import 'dart:convert';
+
+class WKDBConst {
+  static const tableMessage = 'message';
+  static const tableMessageReaction = 'message_reaction';
+  static const tableMessageExtra = 'message_extra';
+  static const tableConversation = 'conversation';
+  static const tableConversationExtra = 'conversation_extra';
+  static const tableChannel = 'channel';
+  static const tableChannelMember = 'channel_members';
+  static const tableReminders = 'reminders';
+  static const tableRobot = 'robot';
+  static const tableRobotMenu = 'robot_menu';
+
+  /// 针对 Dart 字符串优化的 64 位哈希算法 FNV-1a
+  static int fastHash(String string) {
+    var hash = 0xcbf29ce484222325;
+
+    var i = 0;
+    while (i < string.length) {
+      final codeUnit = string.codeUnitAt(i++);
+      hash ^= codeUnit >> 8;
+      hash *= 0x100000001b3;
+      hash ^= codeUnit & 0xFF;
+      hash *= 0x100000001b3;
+    }
+
+    return hash;
+  }
+
+  static int readInt(dynamic data, String key) {
+    dynamic result = data[key];
+    if (result == Null || result == null) {
+      return 0;
+    }
+    if (result is int) {
+      return int.parse(result.toString());
+    }
+    return 0;
+  }
+
+  static String readString(dynamic data, String key) {
+    dynamic result = data[key];
+    if (result == Null || result == null) {
+      return '';
+    }
+    return result.toString();
+  }
+
+  static dynamic readDynamic(dynamic data, String key) {
+    String jsonStr = readString(data, key);
+    if (jsonStr != '' && isJsonString(jsonStr)) {
+      return jsonDecode(jsonStr);
+    }
+    return jsonStr;
+  }
+
+  static bool isJsonString(String str) {
+    try {
+      final parsed = json.decode(str);
+      return parsed is Map || parsed is List;
+    } on FormatException {
+      return false;
+    }
+  }
+
+  static String getPlaceholders(int count) {
+    StringBuffer placeholders = StringBuffer();
+    for (int i = 0; i < count; i++) {
+      if (i != 0) {
+        placeholders.write(", ");
+      }
+      placeholders.write("?");
+    }
+    return placeholders.toString();
+  }
+}
+
 class WkMessageContentType {
   static const unknown = -1;
   static const text = 1;

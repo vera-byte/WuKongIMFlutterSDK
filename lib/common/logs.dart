@@ -1,7 +1,7 @@
 import 'package:wkim_flutter_sdk/wkim.dart';
 
 /// 日志级别
-enum LogLevel { debug, info, error, warn }
+enum LogerLevel { debug, info, error, warn }
 
 /// 日志工具类，支持调试控制、等级区分、表情符号显示
 class Logs {
@@ -9,7 +9,7 @@ class Logs {
   static bool get _enabled => WKIMCore.shared.options.debug;
 
   /// 日志打印核心方法
-  static void _log(LogLevel level, Object msg) {
+  static void _log(LogerLevel level, Object msg) {
     if (!_enabled) return;
 
     final timestamp = DateTime.now().toIso8601String();
@@ -23,42 +23,42 @@ class Logs {
   }
 
   /// 获取日志标签
-  static String _levelLabel(LogLevel level) {
+  static String _levelLabel(LogerLevel level) {
     switch (level) {
-      case LogLevel.debug:
+      case LogerLevel.debug:
         return "DEBUG";
-      case LogLevel.info:
+      case LogerLevel.info:
         return "INFO";
-      case LogLevel.warn:
+      case LogerLevel.warn:
         return "INFO";
-      case LogLevel.error:
+      case LogerLevel.error:
         return "ERROR";
     }
   }
 
   /// 获取对应等级的 Emoji 表情
-  static String _levelEmoji(LogLevel level) {
+  static String _levelEmoji(LogerLevel level) {
     switch (level) {
-      case LogLevel.debug:
+      case LogerLevel.debug:
         return "🐛";
-      case LogLevel.info:
+      case LogerLevel.info:
         return "ℹ️";
-      case LogLevel.warn:
+      case LogerLevel.warn:
         return "⚠️";
-      case LogLevel.error:
+      case LogerLevel.error:
         return "❌";
     }
   }
 
   /// Debug 日志 🐛
-  static void debug(Object msg) => _log(LogLevel.debug, msg);
+  static void debug(Object msg) => _log(LogerLevel.debug, msg);
 
   /// Info 日志 ℹ️
-  static void info(Object msg) => _log(LogLevel.info, msg);
+  static void info(Object msg) => _log(LogerLevel.info, msg);
 
   /// Error 日志 ❌
-  static void error(Object msg) => _log(LogLevel.error, msg);
+  static void error(Object msg) => _log(LogerLevel.error, msg);
 
   /// Warning 日志
-  static void warn(Object msg) => _log(LogLevel.warn, msg);
+  static void warn(Object msg) => _log(LogerLevel.warn, msg);
 }
