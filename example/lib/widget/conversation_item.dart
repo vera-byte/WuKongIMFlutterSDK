@@ -11,6 +11,7 @@ import 'package:wkim_flutter_sdk_example/entity/channel.dart';
 import 'package:wkim_flutter_sdk_example/entity/conversation.dart';
 import 'package:wkim_flutter_sdk_example/entity/message.dart';
 import 'package:wkim_flutter_sdk_example/message_manager.dart';
+import 'package:wkim_flutter_sdk_example/pages/chat/chat.dart';
 import 'package:wkim_flutter_sdk_example/service/http.dart';
 import 'package:wkim_flutter_sdk_example/theme/color.dart';
 import 'package:wkim_flutter_sdk_example/util/adapt.dart';
@@ -149,6 +150,15 @@ class ConversationItem extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (_) => Chat(
+                  channelType: conversationMsg.channelType,
+                  channelId: conversationMsg.channelId,
+                ),
+              ),
+              (Route<dynamic> route) => false);
           // Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Conversation()), (Route<dynamic> route) => false);
 
           // IMUtil.jumpToChat(

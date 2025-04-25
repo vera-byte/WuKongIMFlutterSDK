@@ -36,14 +36,15 @@ class DefaultWKConversationManager extends WKConversationManager {
   Stream<List<WKConversation>> getAllWithTimerRefresh() {
     final isarStream = _isar.wKConversations.where().channelIdNotEqualToAnyChannelType(super.wk.options.uid!).sortByLastMsgTimestampDesc().build().watch(fireImmediately: true).distinct();
 
-    // 每 60 秒触发一次刷新流
+    // 每 30 秒触发一次刷新流
     final timerStream = Stream.periodic(const Duration(seconds: 30), (_) => null);
 
     return isarStream.switchMap((data) {
-      // 把当前数据流和定时器流合并为一个 stream
-      return timerStream
-          .startWith(null) // fireImmediately: true 的替代
-          .map((_) => data); // 每次定时都重新发出旧数据来刷新 UI
+      // 合并定时流和数据流
+      return timerStream.asyncMap((_) async {
+        // 刷新逻辑：每次定时触发时返回当前数据
+        return data;
+      });
     });
   }
 

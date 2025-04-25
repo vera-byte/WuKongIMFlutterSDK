@@ -17,6 +17,10 @@ class DefaultWKMessageManager extends WKMessageManager {
   static DefaultWKMessageManager get shared => _instance;
   final _isar = WKDB.shared.getDB()!;
 
+  Stream<List<WKMessage>> getChatMessages(String channelId, int channelType) {
+    return _isar.wKMessages.filter().channelIdEqualTo(channelId).channelTypeEqualTo(channelType).sortByTimestampDesc().watch(fireImmediately: true);
+  }
+
   @override
   Future<RecvPacket> saveRecvMsg(RecvPacket recvMsg) async {
     print("用户实现saveRecvMsg");
