@@ -3,6 +3,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:wkim_flutter_sdk/common/logs.dart';
+import 'package:wkim_flutter_sdk/core/wk_status.dart';
+import 'package:wkim_flutter_sdk/type/const.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -16,6 +18,7 @@ class ConnectionManager {
 
   static ConnectionManager get shared => _instance;
   static final _wk = WKIMCore.shared;
+
   bool isReconnection = false;
   bool isNetworkUnavailable = false;
   ConnectivityResult? lastConnectivityResult;
@@ -37,8 +40,12 @@ class ConnectionManager {
         throw Exception("连接地址无效");
       }
       Logs.info("开始连接：$uri"); // 记录连接开始日志
+      _wk.statusManage.updateStatus(WKConnectStatus.connecting);
+
       ws = WebSocketChannel.connect(uri); // 连接 WebSocket
       Logs.info("连接成功"); // 记录连接成功日志
+      _wk.statusManage.updateStatus(WKConnectStatus.success);
+
       /// 发送连接数据包
       _wk.packetSenderManage.sendConnectPacket();
 
@@ -47,6 +54,7 @@ class ConnectionManager {
     } catch (e) {
       /// 记录连接异常日志
       Logs.error("连接异常：$e");
+      _wk.statusManage.updateStatus(WKConnectStatus.fail);
 
       /// 处理连接错误
       _handleError();
@@ -116,6 +124,8 @@ class ConnectionManager {
           isReconnection = true;
           isNetworkUnavailable = true;
           Logs.debug('网络断开了');
+          _wk.statusManage.updateStatus(WKConnectStatus.noNetwork);
+
           // _checkSedingMsg();
           // setConnectionStatus(WKConnectStatus.noNetwork);
           lastConnectivityResult = ConnectivityResult.none;

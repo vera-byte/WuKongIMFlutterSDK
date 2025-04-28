@@ -115,23 +115,24 @@ class WKSendMsgResult {
 
 enum WKConnectStatus {
   //失败
-  fail(0),
+  fail(0, "连接失败"),
   // 登录或者发送消息回执返回状态成功
-  success(1),
+  success(1, "连接成功"),
   //被踢（其他设备登录）
-  kicked(2),
+  kicked(2, "被踢:其他设备已登录"),
   //同步消息中
-  syncMsg(3),
+  syncMsg(3, "消息同步中..."),
   //连接中
-  connecting(4),
+  connecting(4, "连接中"),
   //无网络
-  noNetwork(5),
-  //同步完成
-  syncCompleted(6);
+  noNetwork(5, "无网络"),
+  //c
+  syncCompleted(6, "同步完成");
 
   final int value;
+  final String label;
 
-  const WKConnectStatus(this.value);
+  const WKConnectStatus(this.value, this.label);
 
   static WKConnectStatus? fromCode(int code) {
     return WKConnectStatus.values.firstWhere((e) => e.value == code);

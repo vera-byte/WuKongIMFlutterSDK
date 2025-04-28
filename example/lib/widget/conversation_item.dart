@@ -1,16 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:isar/isar.dart';
-import 'package:wkim_flutter_sdk/wkim.dart';
-import 'package:wkim_flutter_sdk_example/channel_manager.dart';
 import 'package:wkim_flutter_sdk_example/conversation_manager.dart';
-import 'package:wkim_flutter_sdk_example/db/wk_db.dart';
-import 'package:wkim_flutter_sdk_example/entity/channel.dart';
 import 'package:wkim_flutter_sdk_example/entity/conversation.dart';
-import 'package:wkim_flutter_sdk_example/entity/message.dart';
-import 'package:wkim_flutter_sdk_example/message_manager.dart';
 import 'package:wkim_flutter_sdk_example/pages/chat/chat.dart';
 import 'package:wkim_flutter_sdk_example/service/http.dart';
 import 'package:wkim_flutter_sdk_example/theme/color.dart';
@@ -150,24 +141,15 @@ class ConversationItem extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (_) => Chat(
-                  channelType: conversationMsg.channelType,
-                  channelId: conversationMsg.channelId,
-                ),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Chat(
+                channelType: conversationMsg.channelType,
+                channelId: conversationMsg.channelId,
               ),
-              (Route<dynamic> route) => false);
-          // Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Conversation()), (Route<dynamic> route) => false);
-
-          // IMUtil.jumpToChat(
-          //   context,
-          //   widget.conversationMsg.channelID,
-          //   channelType: widget.conversationMsg.channelType,
-          // );
-
-          // IMUtil.setSingleConversationUnreadCount(widget.conversationMsg.channelID, widget.conversationMsg.channelType, 0);
+            ),
+          );
         },
         child: StreamBuilder<ConversationViewModel>(
             stream: DefaultWKConversationManager.shared.conversationVMStream(conversationMsg),

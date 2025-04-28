@@ -36,6 +36,16 @@ class _MyAppState extends State<MyApp> {
     AdaptUtil.initAdapt(context, 375);
 
     return MaterialApp(
+      builder: (context, child) {
+        return MediaQuery(
+          /// 文本不随系统缩放
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+          child: GestureDetector(
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: child!,
+          ),
+        );
+      },
       home: LoginDemo(),
     );
   }

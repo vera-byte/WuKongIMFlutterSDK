@@ -32,7 +32,8 @@ class DefaultWKChannelManager extends WKChannelManager {
     }
   }
 
-  Stream<List<WKChannel>>? streamChannel(String channelId, int channelType) {
-    return _isar.wKChannels.filter().channelIdEqualTo(channelId).channelTypeEqualTo(channelType).watch(fireImmediately: true);
+  Stream<WKChannel?> streamChannel(String channelId, int channelType) {
+    final c = _isar.wKChannels.filter().channelIdEqualTo(channelId).channelTypeEqualTo(channelType).findFirstSync();
+    return _isar.wKChannels.watchObject(c?.id ?? 0, fireImmediately: true);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wkim_flutter_sdk/wkim.dart';
 import 'package:wkim_flutter_sdk_example/conversation_manager.dart';
 import 'package:wkim_flutter_sdk_example/theme/color.dart';
 import 'package:wkim_flutter_sdk_example/util/adapt.dart';
@@ -20,97 +21,29 @@ class Conversation extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(vertical: 8 * rpx, horizontal: 16 * rpx),
               width: double.infinity,
-              height: 44 * rpx,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+              child: StreamBuilder(
+                stream: WKIMCore.shared.statusManage.stream,
+                builder: (context, snapshot) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(width: 4 * rpx),
                       Text(
-                        "连接中",
+                        "${snapshot.data?.imStatus.label} 0",
                         style: TextStyle(
                           fontSize: 20 * rpx,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      SizedBox(width: 4 * rpx),
                       Text(
-                        "0",
+                        "节点(${snapshot.data?.nodeId})",
                         style: TextStyle(
-                          fontSize: 20 * rpx,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 10 * rpx,
+                          color: ColorConstant.perfection3,
                         ),
-                      )
+                      ),
                     ],
-                  ),
-                  Row(
-                    children: [
-                      // DebounceButton(
-                      //   onPressed: () {},
-                      //   child: ImageGenerator.generate(src: 'assets/im/conversation/clean.svg', height: 30 * rpx, width: 30 * rpx),
-                      // ),
-                      // SizedBox(width: 18 * rpx),
-                      // DebounceButton(
-                      //   onPressed: () {},
-                      //   child: ImageGenerator.generate(src: 'assets/im/conversation/settings.svg', height: 24 * rpx, width: 24 * rpx),
-                      // ),
-                      // SizedBox(width: 4 * rpx),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16 * rpx),
-              height: 35 * rpx,
-              decoration: const BoxDecoration(
-                color: ColorConstant.warning1,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      // ImageGenerator.generate(
-                      //   src: 'packages/maile_plugin_widget/assets/icons/complain.svg',
-                      //   height: 20 * rpx,
-                      //   width: 20 * rpx,
-                      // ),
-                      SizedBox(width: 4 * rpx),
-                      Text(
-                        "开启消息通知，第一时间获取最新动态~",
-                        style: TextStyle(
-                          color: ColorConstant.warning6,
-                          fontSize: 13 * rpx,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      )
-                    ],
-                  ),
-                  // DebounceButton(
-                  //   onPressed: () {
-                  //     CustomLogger.instance.d(["去开启通知"]);
-                  //   },
-                  //   child: Row(
-                  //     children: [
-                  //       Text(
-                  //         "去开启",
-                  //         style: TextStyle(
-                  //           color: ColorConstant.warning6,
-                  //           fontSize: 13 * rpx,
-                  //           fontWeight: FontWeight.w500,
-                  //         ),
-                  //       ),
-                  //       Icon(
-                  //         Icons.keyboard_arrow_right_outlined,
-                  //         size: 17 * rpx,
-                  //         color: ColorConstant.warning6,
-                  //       )
-                  //     ],
-                  //   ),
-                  // )
-                ],
+                  );
+                },
               ),
             ),
             Expanded(
@@ -125,7 +58,6 @@ class Conversation extends StatelessWidget {
                         itemCount: data.length,
                         controller: _scrollController,
                         cacheExtent: 30,
-                        // itemExtent: 90 * rpx,
                         prototypeItem: ConversationItem(data.first), // 优化 在未知ConversationItem的时候使用
                         itemBuilder: (context, index) => ConversationItem(
                           data[index],
@@ -145,15 +77,6 @@ class Conversation extends StatelessWidget {
                               color: ColorConstant.text5,
                               fontSize: 14 * rpx,
                               fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 4 * rpx),
-                          Text(
-                            "点击刷新或退出重进试试呢",
-                            style: TextStyle(
-                              color: ColorConstant.text3,
-                              fontSize: 12 * rpx,
-                              fontWeight: FontWeight.w400,
                             ),
                           ),
                         ],

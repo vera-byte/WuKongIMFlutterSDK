@@ -31,6 +31,7 @@ dependencies:
   extended_text_field: 15.0.0
   flutter_svg: 2.0.17
   extended_text: 13.1.0
+  chat_bottom_container: ^0.3.1
 dev_dependencies:
   integration_test:
     sdk: flutter
@@ -58,9 +59,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/im/chat/
+    - assets/im/conversation/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

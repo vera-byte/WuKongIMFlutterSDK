@@ -34,18 +34,29 @@ class DefaultWKConversationManager extends WKConversationManager {
 
   /// 实现了列表自动刷新，为了最后一条消息时间重新计算
   Stream<List<WKConversation>> getAllWithTimerRefresh() {
-    final isarStream = _isar.wKConversations.where().channelIdNotEqualToAnyChannelType(super.wk.options.uid!).sortByLastMsgTimestampDesc().build().watch(fireImmediately: true).distinct();
+    // 创建 Isar 查询，按 channelId 和时间戳降序排列
+    final isarQuery = _isar.wKConversations
+        .where()
+        .channelIdNotEqualToAnyChannelType(super.wk.options.uid!) // 排除指定 channelId
+        .sortByLastMsgTimestampDesc() // 按最后消息时间戳降序排列
+        .build(); // 构建查询对象
 
-    // 每 30 秒触发一次刷新流
-    final timerStream = Stream.periodic(const Duration(seconds: 30), (_) => null);
-
-    return isarStream.switchMap((data) {
-      // 合并定时流和数据流
-      return timerStream.asyncMap((_) async {
-        // 刷新逻辑：每次定时触发时返回当前数据
-        return data;
-      });
+    // 监听查询结果的变化，当数据有变动时触发
+    final isarStream = isarQuery.watch(fireImmediately: true).distinct();
+    // 创建定时流，每 30 秒触发一次，并返回最新的 WKConversation 列表
+    final timerStream = Stream.periodic(const Duration(seconds: 30), (_) => null).asyncMap((_) async {
+      // 每次定时触发时，返回最新的数据
+      return await isarQuery.findAll();
     });
+
+    // 合并 Isar 数据流和定时流
+    // .merge()：两个流合并，任何一个流的变化都会触发接下来的操作
+    // .debounce()：防抖 300ms，避免短时间内多次触发（比如插入数据后立刻刷新）
+    // .asyncMap()：每次流到来时，重新从数据库拉取所有数据
+    return isarStream
+        .merge(timerStream) // 合并两个流
+        .debounce(const Duration(milliseconds: 300)) // 防抖 300mss
+        .asyncMap((_) => isarQuery.findAll()); // 每次触发时查询所有数据
   }
 
   /// 合并数据流
@@ -54,9 +65,9 @@ class DefaultWKConversationManager extends WKConversationManager {
     final channelId = conversation.channelId;
     final channelType = conversation.channelType;
 
-    final messageStream = isar.wKMessages.filter().channelIdEqualTo(channelId).channelTypeEqualTo(channelType).sortByTimestampDesc().limit(1).watch(fireImmediately: true).map((list) => list.isNotEmpty ? list.first : null);
+    final messageStream = isar.wKMessages.filter().channelIdEqualTo(channelId).channelTypeEqualTo(channelType).sortByTimestampDesc().limit(1).watch(fireImmediately: true).distinct().map((list) => list.isNotEmpty ? list.first : null);
 
-    final channelStream = isar.wKChannels.filter().channelIdEqualTo(channelId).channelTypeEqualTo(channelType).limit(1).watch(fireImmediately: true).map((list) => list.isNotEmpty ? list.first : null);
+    final channelStream = isar.wKChannels.filter().channelIdEqualTo(channelId).channelTypeEqualTo(channelType).limit(1).watch(fireImmediately: true).distinct().map((list) => list.isNotEmpty ? list.first : null);
 
     return messageStream.combineLatest(channelStream, (WKMessage? message, WKChannel? channel) {
       return ConversationViewModel(

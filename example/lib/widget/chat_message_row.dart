@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:wkim_flutter_sdk/type/const.dart';
 import 'package:wkim_flutter_sdk_example/entity/message.dart';
+import 'package:wkim_flutter_sdk_example/service/http.dart';
 import 'package:wkim_flutter_sdk_example/theme/color.dart';
 import 'package:wkim_flutter_sdk_example/util/adapt.dart';
 import 'package:wkim_flutter_sdk_example/widget/avatar.dart';
@@ -193,31 +194,11 @@ class ChatMessageRow extends StatelessWidget {
                     onTap: () {
                       // RouterHelper.push(context, const PersonalHomepage());
                     },
-                    child: AvatarWidget("https://tsdd.mailevw.com/v1${msg.channel.value?.avatar}", size: 36 * rpx, borderRadius: 18 * rpx),
+                    child: AvatarWidget("${HttpUtils.apiURL}${msg.channel.value?.avatar}", size: 36 * rpx, borderRadius: 18 * rpx),
                   ),
                 ),
             ],
           ),
-          // // 已注销
-          // if (remoteExtraMap.State != 0)
-          // Center(
-          //   child: Container(
-          //     width: 170 * rpx,
-          //     height: 22 * rpx,
-          //     alignment: Alignment.center,
-          //     decoration: BoxDecoration(
-          //       color: Colors.black.withOpacity(0.04),
-          //       borderRadius: BorderRadius.circular(4 * rpx),
-          //     ),
-          //     child: Text(
-          //       "该用户不存在，无法接收消息",
-          //       style: TextStyle(
-          //         fontSize: 12 * rpx,
-          //         color: ColorConstant.text3,
-          //       ),
-          //     ),
-          //   ),
-          // )
         ],
       ),
     );
