@@ -130,7 +130,7 @@ class LoginDemoState extends State<LoginDemo> {
                       },
                     ).then((_) {
                       WKIMCore.shared.channelManager.getChannelWithAsync(uidStr, 1, true);
-                      // WKIMCore.shared.conversationManager.syncConversationToDB();
+                      WKIMCore.shared.conversationManager.syncConversationToDB();
                       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Conversation()), (Route<dynamic> route) => false);
                     });
                   }

@@ -38,6 +38,10 @@ class WKConversation {
   String parentChannelID = '';
   @Index()
   int parentChannelType = 0;
+  //是否删除
+  @Index()
+  int isDeleted = 0;
+
   // @Backlink(to: 'channel') // 反向：频道包含的消息
   final channel = IsarLink<WKChannel>();
   @Backlink(to: 'conversation') // 反向：频道包含的消息

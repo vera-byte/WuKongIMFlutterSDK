@@ -1,4 +1,6 @@
 PODS:
+  - chat_bottom_container (0.0.1):
+    - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -20,6 +22,7 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - chat_bottom_container (from `.symlinks/plugins/chat_bottom_container/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - encryptions (from `.symlinks/plugins/encryptions/ios`)
   - Flutter (from `Flutter`)
@@ -30,6 +33,8 @@ DEPENDENCIES:
   - sqflite (from `.symlinks/plugins/sqflite/darwin`)
 
 EXTERNAL SOURCES:
+  chat_bottom_container:
+    :path: ".symlinks/plugins/chat_bottom_container/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/darwin"
   encryptions:
@@ -48,6 +53,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqflite/darwin"
 
 SPEC CHECKSUMS:
+  chat_bottom_container: f1eb8323db77a87db50f361142c679f11e892d1b
   connectivity_plus: 2256d3e20624a7749ed21653aafe291a46446fee
   encryptions: c5680419172c429798949bc9b72a05412c2639e3
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7

@@ -59,43 +59,7 @@ class DefaultWKMessageManager extends WKMessageManager {
         //   WKIM.shared.conversationManager.setRefreshUIMsgs(list);
         // }
         /// 存储前必须查询数据库是否存在 否则唯一索引冲突
-        WKConversation conv = await wk.conversationManager.getConversationWithAsync(msg.channelId, msg.channelType);
-        if (msg.channelType == WKChannelType.communityTopic && msg.channelId != '') {
-          if (msg.channelId.contains("@")) {
-            var str = msg.channelId.split("@");
-            conv.parentChannelID = str[0];
-            conv.parentChannelType = WKChannelType.community;
-          }
-        }
-        conv.lastMsgTimestamp = msg.timestamp;
-        conv.channelId = msg.channelId;
-        conv.channelType = msg.channelType;
-        conv.lastClientMsgNo = msg.clientMsgNo;
-        conv.lastMsgSeq = msg.messageSeq;
-        conv.unreadCount = msg.readed;
-        // conv.lastMessage.value = msg;
-        WKChannel channel = WKChannel(msg.channelId, msg.channelType);
-        channel = await wk.channelManager.getChannelWithAsync(channel.channelId, channel.channelType, true);
-
-        /// 确定关系
-        conv.channel.value = channel;
-        if (msg.channelType == WKChannelType.group) {
-          /// 群的时候不一样
-          WKChannel fromChannel = WKChannel(msg.fromUid, 1);
-          fromChannel = await wk.channelManager.getChannelWithAsync(fromChannel.channelId, fromChannel.channelType, true);
-          msg.fromChannel.value = fromChannel;
-        }
-
-        /// 确定关系
-        msg.channel.value = channel;
-
-        /// 确定关系
-        msg.conversation.value = conv;
-        _isar.writeTxnSync(() {
-          _isar.wKMessages.putByMessageIdStrSync(msg);
-        });
-
-        /// end 存储完成
+        await putMessageIntoStorage(msg);
       } else {
         Logs.debug('消息不能存库:is_deleted=${msg.isDeleted},no_persist=${msg.header.noPersist},content_type:${msg.contentType}');
       }
@@ -103,6 +67,50 @@ class DefaultWKMessageManager extends WKMessageManager {
       return Future.value(recvMsg);
     } catch (e) {
       rethrow;
+    }
+  }
+
+  /// 入库
+  @override
+  putMessageIntoStorage(dynamic msg) async {
+    if (msg is WKMessage) {
+      WKConversation conv = await wk.conversationManager.getConversationWithAsync(msg.channelId, msg.channelType);
+      if (msg.channelType == WKChannelType.communityTopic && msg.channelId != '') {
+        if (msg.channelId.contains("@")) {
+          var str = msg.channelId.split("@");
+          conv.parentChannelID = str[0];
+          conv.parentChannelType = WKChannelType.community;
+        }
+      }
+      conv.lastMsgTimestamp = msg.timestamp;
+      conv.channelId = msg.channelId;
+      conv.channelType = msg.channelType;
+      conv.lastClientMsgNo = msg.clientMsgNo;
+      conv.lastMsgSeq = msg.messageSeq;
+      conv.unreadCount = msg.readed;
+      // conv.lastMessage.value = msg;
+      WKChannel channel = WKChannel(msg.channelId, msg.channelType);
+      channel = await wk.channelManager.getChannelWithAsync(channel.channelId, channel.channelType, true);
+
+      /// 确定关系
+      conv.channel.value = channel;
+      // if (msg.channelType == WKChannelType.group) {
+      /// 群的时候不一样
+      WKChannel fromChannel = WKChannel(msg.fromUid, 1);
+      fromChannel = await wk.channelManager.getChannelWithAsync(fromChannel.channelId, fromChannel.channelType, true);
+      msg.fromChannel.value = fromChannel;
+      // }
+
+      /// 确定关系
+      msg.channel.value = channel;
+
+      /// 确定关系
+      msg.conversation.value = conv;
+      _isar.writeTxnSync(() {
+        _isar.wKMessages.putByMessageIdStrSync(msg);
+      });
+    } else {
+      Logs.error("消息入库类型错误");
     }
   }
 

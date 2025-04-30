@@ -1,7 +1,11 @@
+import 'dart:isolate';
+
 import 'package:isar/isar.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:wkim_flutter_sdk/common/logs.dart';
 import 'package:wkim_flutter_sdk/core/interface/conversation_manager_interface.dart';
+import 'package:wkim_flutter_sdk/proto/packet.dart';
+import 'package:wkim_flutter_sdk/type/const.dart';
 import 'package:wkim_flutter_sdk_example/db/wk_db.dart';
 import 'package:wkim_flutter_sdk_example/entity/channel.dart';
 import 'package:wkim_flutter_sdk_example/entity/conversation.dart';
@@ -78,24 +82,58 @@ class DefaultWKConversationManager extends WKConversationManager {
     });
   }
 
+  @override
+  String getLastMsgSeqs() {
+    final conversations = _isar.wKConversations.filter().channelIdIsNotEmpty().and().isDeletedEqualTo(0).findAllSync();
+
+    final buffer = StringBuffer();
+
+    for (final convo in conversations) {
+      final lastMessage = _isar.wKMessages.filter().channelIdEqualTo(convo.channelId).and().channelTypeEqualTo(convo.channelType).sortByMessageSeqDesc().findFirstSync(); // max seq
+
+      final lastSeq = lastMessage?.messageSeq ?? 0;
+      buffer.write('${convo.channelId}:${convo.channelType}:$lastSeq|');
+    }
+
+    // 移除最后一个 |
+    final result = buffer.toString();
+    return result.isNotEmpty ? result.substring(0, result.length - 1) : '';
+  }
+
   /// 同步会话到数据库
   @override
   Future<void> syncConversationToDB() async {
     Logs.debug("消息同步中");
-
+    final lastSsgSeqs = getLastMsgSeqs();
     HttpUtils.syncConversation("", 20, 0, (cons, recentMsgs) async {
       try {
-        /// 调用消息同步
-        await super.wk.messageManager.syncMessage(recentMsgs);
+        wk.statusManage.updateStatus(WKConnectStatus.syncMsg);
+        final receivePort = ReceivePort(); // 用于接收结果
 
-        /// 批量保存会话
-        _isar.writeTxnSync(() {
-          _isar.wKConversations.putAllByChannelIdChannelTypeSync(cons);
+        // 启动多个 Isolate 来处理每个消息
+        for (var e in recentMsgs) {
+          // 传递接收端口到新 Isolate
+          await Isolate.spawn((SendPort sendPort) async {
+            await processMessage(sendPort, e);
+          }, receivePort.sendPort);
+        }
+
+        // 监听结果
+        receivePort.listen((message) {
+          print(message); // 打印每个处理的结果
         });
+
+        wk.statusManage.updateStatus(WKConnectStatus.syncCompleted);
       } catch (e) {
         rethrow;
       }
     });
+  }
+
+  Future<void> processMessage(SendPort sendPort, dynamic message) async {
+    // 处理消息的异步操作
+    await wk.messageManager.putMessageIntoStorage(message);
+    sendPort.send('Processed: $message');
   }
 
   @override

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:wkim_flutter_sdk/type/const.dart';
+import 'package:wkim_flutter_sdk/wkim.dart';
 import 'package:wkim_flutter_sdk_example/entity/message.dart';
 import 'package:wkim_flutter_sdk_example/service/http.dart';
 import 'package:wkim_flutter_sdk_example/theme/color.dart';
@@ -17,7 +18,7 @@ class ChatMessageRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool self = true;
+    bool self = msg.fromUid == WKIMCore.shared.options.uid;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -40,20 +41,8 @@ class ChatMessageRow extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.only(right: 8 * rpx),
                   child: GestureDetector(
-                    onTap: () {
-                      //
-                      // final jsonData = json.encode(snap.data?.remoteExtraMap);
-                      // final Map<String, dynamic> decodedData = json.decode(jsonData);
-                      // final channelAccountId = decodedData['ChannelAccountId'];
-                      // // print(channelAccountId);
-                      // RouterHelper.push(
-                      //   context,
-                      //   PersonalHomepage(
-                      //     accountId: int.parse(channelAccountId ?? ""),
-                      //   ),
-                      // );
-                    },
-                    child: AvatarWidget(msg.channel.value?.avatar ?? "", size: 36 * rpx, borderRadius: 18 * rpx),
+                    onTap: () {},
+                    child: AvatarWidget("${HttpUtils.apiURL}${msg.channel.value?.avatar}", size: 36 * rpx, borderRadius: 18 * rpx),
                   ),
                 ),
               Column(
@@ -194,7 +183,7 @@ class ChatMessageRow extends StatelessWidget {
                     onTap: () {
                       // RouterHelper.push(context, const PersonalHomepage());
                     },
-                    child: AvatarWidget("${HttpUtils.apiURL}${msg.channel.value?.avatar}", size: 36 * rpx, borderRadius: 18 * rpx),
+                    child: AvatarWidget("${HttpUtils.apiURL}${msg.fromChannel.value?.avatar}", size: 36 * rpx, borderRadius: 18 * rpx),
                   ),
                 ),
             ],

@@ -296,15 +296,6 @@ class Chat extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          SizedBox(height: 4 * rpx),
-                          Text(
-                            "点击刷新或退出重进试试呢",
-                            style: TextStyle(
-                              color: ColorConstant.text3,
-                              fontSize: 12 * rpx,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
                         ],
                       );
                     }

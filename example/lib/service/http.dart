@@ -12,7 +12,7 @@ import 'package:wkim_flutter_sdk_example/entity/message.dart';
 
 class HttpUtils {
   // static String apiURL = "https://api.githubim.com";
-  static String apiURL = "http://62.234.8.38:7090/v1/";
+  static String apiURL = "http://62.234.8.38:7090/v1";
   // static String apiURL = "http://175.27.245.108:15001";
   static final dio = Dio(BaseOptions(
     baseUrl: apiURL,
@@ -253,29 +253,6 @@ class HttpUtils {
   //   return extra;
   // }
 
-  // static getGroupInfo(String groupId) async {
-  //   final httpClient = HttpClient();
-  //   httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) {
-  //     // 信任所有证书
-  //     return true;
-  //   };
-  //   final dio = Dio();
-  //   dio.httpClientAdapter = DefaultHttpClientAdapter()
-  //     ..onHttpClientCreate = (client) {
-  //       return httpClient;
-  //     };
-  //   final response = await dio.get('$apiURL/groups/$groupId');
-  //   if (response.statusCode == HttpStatus.ok) {
-  //     var json = response.data;
-  //     var channel = WKChannel(groupId, WKChannelType.group);
-  //     channel.channelName = json['name'];
-  //     channel.avatar = json['avatar'];
-  //     WKIM.shared.channelManager.addOrUpdateChannel(channel);
-  //   } else {
-  //     print('获取群信息失败');
-  //   }
-  // }
-
   static Future<WKChannel> getChannelInfo(String uid, int channelType) async {
     var channel = WKChannel(uid, channelType);
 
@@ -283,7 +260,7 @@ class HttpUtils {
     if (response.statusCode == HttpStatus.ok) {
       var json = response.data;
       channel.channelName = json['name'];
-      channel.avatar = json['avatar'];
+      channel.avatar = "/${json['avatar']}";
       return channel;
     }
     channel.channelName = "获取失败";
@@ -319,32 +296,22 @@ class HttpUtils {
   //   }
   // }
 
-  // static deleteMsg(String clientMsgNo, String channelId, int channelType, int msgSeq, String msgId) async {
-  //   final httpClient = HttpClient();
-  //   httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) {
-  //     // 信任所有证书
-  //     return true;
-  //   };
-  //   final dio = Dio();
-  //   dio.httpClientAdapter = DefaultHttpClientAdapter()
-  //     ..onHttpClientCreate = (client) {
-  //       return httpClient;
-  //     };
-  //   try {
-  //     final response = await dio.post('$apiURL/message/delete', data: {
-  //       'login_uid': UserInfo.uid,
-  //       'channel_id': channelId,
-  //       'channel_type': channelType,
-  //       'message_seq': msgSeq,
-  //       'message_id': msgId,
-  //     });
-  //     if (response.statusCode == HttpStatus.ok) {
-  //       WKIM.shared.messageManager.deleteWithClientMsgNo(clientMsgNo);
-  //     }
-  //   } catch (e) {
-  //     print('删除消息失败$e');
-  //   }
-  // }
+  static deleteMsg(String clientMsgNo, String channelId, int channelType, int msgSeq, String msgId) async {
+    try {
+      final response = await dio.post('$apiURL/message/delete', data: {
+        'login_uid': UserInfo.uid,
+        'channel_id': channelId,
+        'channel_type': channelType,
+        'message_seq': msgSeq,
+        'message_id': msgId,
+      });
+      if (response.statusCode == HttpStatus.ok) {
+        // WKIM.shared.messageManager.deleteWithClientMsgNo(clientMsgNo);
+      }
+    } catch (e) {
+      print('删除消息失败$e');
+    }
+  }
 
   // static syncMsgExtra(String channelId, int channelType, int version) async {
   //   final httpClient = HttpClient();
@@ -390,109 +357,69 @@ class HttpUtils {
   //   }
   // }
 
-  // // 清空红点
-  // static clearUnread(String channelId, int channelType) async {
-  //   final httpClient = HttpClient();
-  //   httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) {
-  //     // 信任所有证书
-  //     return true;
-  //   };
-  //   final dio = Dio();
-  //   dio.httpClientAdapter = DefaultHttpClientAdapter()
-  //     ..onHttpClientCreate = (client) {
-  //       return httpClient;
-  //     };
-  //   try {
-  //     final response = await dio.put('$apiURL/conversation/clearUnread', data: {
-  //       'login_uid': UserInfo.uid,
-  //       'channel_id': channelId,
-  //       'channel_type': channelType,
-  //       'unread': 0,
-  //     });
-  //     if (response.statusCode == HttpStatus.ok) {
-  //       print('清空红点成功');
-  //     }
-  //   } catch (e) {
-  //     print('清空红点失败$e');
-  //   }
-  // }
+  // 清空红点
+  static clearUnread(String channelId, int channelType) async {
+    try {
+      final response = await dio.put('$apiURL/conversation/clearUnread', data: {
+        'login_uid': UserInfo.uid,
+        'channel_id': channelId,
+        'channel_type': channelType,
+        'unread': 0,
+      });
+      if (response.statusCode == HttpStatus.ok) {
+        print('清空红点成功');
+      }
+    } catch (e) {
+      print('清空红点失败$e');
+    }
+  }
 
-  // // 清除频道消息
-  // static clearChannelMsg(String channelId, int channelType) async {
-  //   final httpClient = HttpClient();
-  //   httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) {
-  //     // 信任所有证书
-  //     return true;
-  //   };
-  //   final dio = Dio();
-  //   dio.httpClientAdapter = DefaultHttpClientAdapter()
-  //     ..onHttpClientCreate = (client) {
-  //       return httpClient;
-  //     };
-  //   try {
-  //     int maxSeq = await WKIM.shared.messageManager.getMaxMessageSeq(channelId, channelType);
-  //     final response = await dio.post('$apiURL/message/offset', data: {'login_uid': UserInfo.uid, 'channel_id': channelId, 'channel_type': channelType, 'message_seq': maxSeq});
-  //     if (response.statusCode == HttpStatus.ok) {
-  //       WKIM.shared.messageManager.clearWithChannel(channelId, channelType);
-  //     }
-  //   } catch (e) {
-  //     print('清除频道消息失败$e');
-  //   }
-  // }
+  // 清除频道消息
+  static clearChannelMsg(String channelId, int channelType) async {
+    try {
+      // int maxSeq = await WKIM.shared.messageManager.getMaxMessageSeq(channelId, channelType);
+      // final response = await dio.post('$apiURL/message/offset', data: {'login_uid': UserInfo.uid, 'channel_id': channelId, 'channel_type': channelType, 'message_seq': maxSeq});
+      // if (response.statusCode == HttpStatus.ok) {
+      //   WKIM.shared.messageManager.clearWithChannel(channelId, channelType);
+      // }
+    } catch (e) {
+      print('清除频道消息失败$e');
+    }
+  }
 
-  // // 创建群
-  // static Future<bool> createGroup(String groupNo) async {
-  //   final httpClient = HttpClient();
-  //   httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) {
-  //     // 信任所有证书
-  //     return true;
-  //   };
-  //   final dio = Dio();
-  //   dio.httpClientAdapter = DefaultHttpClientAdapter()
-  //     ..onHttpClientCreate = (client) {
-  //       return httpClient;
-  //     };
-  //   try {
-  //     final response = await dio.post('$apiURL/group/create', data: {
-  //       'login_uid': UserInfo.uid,
-  //       'group_no': groupNo,
-  //     });
-  //     if (response.statusCode == HttpStatus.ok) {
-  //       return true;
-  //     } else {
-  //       return false;
-  //     }
-  //   } catch (e) {
-  //     print('创建群失败$e');
-  //     return false;
-  //   }
-  // }
+  // 创建群
+  static Future<bool> createGroup(String groupNo) async {
+    try {
+      final response = await dio.post('$apiURL/group/create', data: {
+        'login_uid': WKIMCore.shared.options.uid,
+        'group_no': groupNo,
+      });
+      if (response.statusCode == HttpStatus.ok) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('创建群失败$e');
+      return false;
+    }
+  }
 
-  // // 修改群名称
-  // static Future<bool> updateGroupName(String groupNo, String groupName) async {
-  //   final httpClient = HttpClient();
-  //   httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) {
-  //     // 信任所有证书
-  //     return true;
-  //   };
-  //   final dio = Dio();
-  //   dio.httpClientAdapter = DefaultHttpClientAdapter()
-  //     ..onHttpClientCreate = (client) {
-  //       return httpClient;
-  //     };
-  //   try {
-  //     final response = await dio.put('$apiURL/groups/$groupNo', data: {
-  //       'login_uid': UserInfo.uid,
-  //       'name': groupName,
-  //     });
-  //     if (response.statusCode == HttpStatus.ok) {
-  //       return true;
-  //     } else {
-  //       return false;
-  //     }
-  //   } catch (e) {
-  //     print('修改群名称失败$e');
-  //     return false;
-  //   }
-  // }
+  // 修改群名称
+  static Future<bool> updateGroupName(String groupNo, String groupName) async {
+    try {
+      final response = await dio.put('$apiURL/groups/$groupNo', data: {
+        'login_uid': WKIMCore.shared.options.uid,
+        'name': groupName,
+      });
+      if (response.statusCode == HttpStatus.ok) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('修改群名称失败$e');
+      return false;
+    }
+  }
 }

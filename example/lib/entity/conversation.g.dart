@@ -27,43 +27,48 @@ const WKConversationSchema = CollectionSchema(
       name: r'channelType',
       type: IsarType.long,
     ),
-    r'lastClientMsgNo': PropertySchema(
+    r'isDeleted': PropertySchema(
       id: 2,
+      name: r'isDeleted',
+      type: IsarType.long,
+    ),
+    r'lastClientMsgNo': PropertySchema(
+      id: 3,
       name: r'lastClientMsgNo',
       type: IsarType.string,
     ),
     r'lastMsgSeq': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'lastMsgSeq',
       type: IsarType.long,
     ),
     r'lastMsgTimestamp': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'lastMsgTimestamp',
       type: IsarType.long,
     ),
     r'offsetMsgSeq': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'offsetMsgSeq',
       type: IsarType.long,
     ),
     r'parentChannelID': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'parentChannelID',
       type: IsarType.string,
     ),
     r'parentChannelType': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'parentChannelType',
       type: IsarType.long,
     ),
     r'unreadCount': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'unreadCount',
       type: IsarType.long,
     ),
     r'version': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'version',
       type: IsarType.long,
     )
@@ -208,6 +213,19 @@ const WKConversationSchema = CollectionSchema(
           caseSensitive: false,
         )
       ],
+    ),
+    r'isDeleted': IndexSchema(
+      id: -786475870904832312,
+      name: r'isDeleted',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'isDeleted',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
     )
   },
   links: {
@@ -252,14 +270,15 @@ void _wKConversationSerialize(
 ) {
   writer.writeString(offsets[0], object.channelId);
   writer.writeLong(offsets[1], object.channelType);
-  writer.writeString(offsets[2], object.lastClientMsgNo);
-  writer.writeLong(offsets[3], object.lastMsgSeq);
-  writer.writeLong(offsets[4], object.lastMsgTimestamp);
-  writer.writeLong(offsets[5], object.offsetMsgSeq);
-  writer.writeString(offsets[6], object.parentChannelID);
-  writer.writeLong(offsets[7], object.parentChannelType);
-  writer.writeLong(offsets[8], object.unreadCount);
-  writer.writeLong(offsets[9], object.version);
+  writer.writeLong(offsets[2], object.isDeleted);
+  writer.writeString(offsets[3], object.lastClientMsgNo);
+  writer.writeLong(offsets[4], object.lastMsgSeq);
+  writer.writeLong(offsets[5], object.lastMsgTimestamp);
+  writer.writeLong(offsets[6], object.offsetMsgSeq);
+  writer.writeString(offsets[7], object.parentChannelID);
+  writer.writeLong(offsets[8], object.parentChannelType);
+  writer.writeLong(offsets[9], object.unreadCount);
+  writer.writeLong(offsets[10], object.version);
 }
 
 WKConversation _wKConversationDeserialize(
@@ -273,14 +292,15 @@ WKConversation _wKConversationDeserialize(
     reader.readLong(offsets[1]),
   );
   object.id = id;
-  object.lastClientMsgNo = reader.readString(offsets[2]);
-  object.lastMsgSeq = reader.readLong(offsets[3]);
-  object.lastMsgTimestamp = reader.readLong(offsets[4]);
-  object.offsetMsgSeq = reader.readLong(offsets[5]);
-  object.parentChannelID = reader.readString(offsets[6]);
-  object.parentChannelType = reader.readLong(offsets[7]);
-  object.unreadCount = reader.readLong(offsets[8]);
-  object.version = reader.readLong(offsets[9]);
+  object.isDeleted = reader.readLong(offsets[2]);
+  object.lastClientMsgNo = reader.readString(offsets[3]);
+  object.lastMsgSeq = reader.readLong(offsets[4]);
+  object.lastMsgTimestamp = reader.readLong(offsets[5]);
+  object.offsetMsgSeq = reader.readLong(offsets[6]);
+  object.parentChannelID = reader.readString(offsets[7]);
+  object.parentChannelType = reader.readLong(offsets[8]);
+  object.unreadCount = reader.readLong(offsets[9]);
+  object.version = reader.readLong(offsets[10]);
   return object;
 }
 
@@ -296,20 +316,22 @@ P _wKConversationDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
-    case 3:
       return (reader.readLong(offset)) as P;
+    case 3:
+      return (reader.readString(offset)) as P;
     case 4:
       return (reader.readLong(offset)) as P;
     case 5:
       return (reader.readLong(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
-    case 7:
       return (reader.readLong(offset)) as P;
+    case 7:
+      return (reader.readString(offset)) as P;
     case 8:
       return (reader.readLong(offset)) as P;
     case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -487,6 +509,14 @@ extension WKConversationQueryWhereSort
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'parentChannelType'),
+      );
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterWhere> anyIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'isDeleted'),
       );
     });
   }
@@ -1444,6 +1474,99 @@ extension WKConversationQueryWhere
       ));
     });
   }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterWhereClause>
+      isDeletedEqualTo(int isDeleted) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'isDeleted',
+        value: [isDeleted],
+      ));
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterWhereClause>
+      isDeletedNotEqualTo(int isDeleted) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isDeleted',
+              lower: [],
+              upper: [isDeleted],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isDeleted',
+              lower: [isDeleted],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isDeleted',
+              lower: [isDeleted],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isDeleted',
+              lower: [],
+              upper: [isDeleted],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterWhereClause>
+      isDeletedGreaterThan(
+    int isDeleted, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'isDeleted',
+        lower: [isDeleted],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterWhereClause>
+      isDeletedLessThan(
+    int isDeleted, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'isDeleted',
+        lower: [],
+        upper: [isDeleted],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterWhereClause>
+      isDeletedBetween(
+    int lowerIsDeleted,
+    int upperIsDeleted, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'isDeleted',
+        lower: [lowerIsDeleted],
+        includeLower: includeLower,
+        upper: [upperIsDeleted],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension WKConversationQueryFilter
@@ -1705,6 +1828,62 @@ extension WKConversationQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterFilterCondition>
+      isDeletedEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDeleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterFilterCondition>
+      isDeletedGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'isDeleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterFilterCondition>
+      isDeletedLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'isDeleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterFilterCondition>
+      isDeletedBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'isDeleted',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -2432,6 +2611,19 @@ extension WKConversationQuerySortBy
     });
   }
 
+  QueryBuilder<WKConversation, WKConversation, QAfterSortBy> sortByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterSortBy>
+      sortByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
+    });
+  }
+
   QueryBuilder<WKConversation, WKConversation, QAfterSortBy>
       sortByLastClientMsgNo() {
     return QueryBuilder.apply(this, (query) {
@@ -2585,6 +2777,19 @@ extension WKConversationQuerySortThenBy
     });
   }
 
+  QueryBuilder<WKConversation, WKConversation, QAfterSortBy> thenByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QAfterSortBy>
+      thenByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
+    });
+  }
+
   QueryBuilder<WKConversation, WKConversation, QAfterSortBy>
       thenByLastClientMsgNo() {
     return QueryBuilder.apply(this, (query) {
@@ -2714,6 +2919,13 @@ extension WKConversationQueryWhereDistinct
   }
 
   QueryBuilder<WKConversation, WKConversation, QDistinct>
+      distinctByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDeleted');
+    });
+  }
+
+  QueryBuilder<WKConversation, WKConversation, QDistinct>
       distinctByLastClientMsgNo({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastClientMsgNo',
@@ -2788,6 +3000,12 @@ extension WKConversationQueryProperty
   QueryBuilder<WKConversation, int, QQueryOperations> channelTypeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'channelType');
+    });
+  }
+
+  QueryBuilder<WKConversation, int, QQueryOperations> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDeleted');
     });
   }
 
