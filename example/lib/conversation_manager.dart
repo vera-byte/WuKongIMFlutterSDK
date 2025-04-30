@@ -105,35 +105,18 @@ class DefaultWKConversationManager extends WKConversationManager {
   Future<void> syncConversationToDB() async {
     Logs.debug("消息同步中");
     final lastSsgSeqs = getLastMsgSeqs();
-    HttpUtils.syncConversation("", 20, 0, (cons, recentMsgs) async {
+    HttpUtils.syncConversation(lastSsgSeqs, 20, 0, (cons, recentMsgs) async {
       try {
         wk.statusManage.updateStatus(WKConnectStatus.syncMsg);
-        final receivePort = ReceivePort(); // 用于接收结果
 
-        // 启动多个 Isolate 来处理每个消息
         for (var e in recentMsgs) {
-          // 传递接收端口到新 Isolate
-          await Isolate.spawn((SendPort sendPort) async {
-            await processMessage(sendPort, e);
-          }, receivePort.sendPort);
+          await wk.messageManager.putMessageIntoStorage(e);
         }
-
-        // 监听结果
-        receivePort.listen((message) {
-          print(message); // 打印每个处理的结果
-        });
-
         wk.statusManage.updateStatus(WKConnectStatus.syncCompleted);
       } catch (e) {
         rethrow;
       }
     });
-  }
-
-  Future<void> processMessage(SendPort sendPort, dynamic message) async {
-    // 处理消息的异步操作
-    await wk.messageManager.putMessageIntoStorage(message);
-    sendPort.send('Processed: $message');
   }
 
   @override
@@ -167,5 +150,11 @@ class DefaultWKConversationManager extends WKConversationManager {
     WKConversation conversation = WKConversation(channelId, channelType);
     // 查询本地缓存
     return await _isar.wKConversations.getByChannelIdChannelType(channelId, channelType) ?? conversation;
+  }
+
+  Future<void> processMessageInIsolate(SendPort sendPort, dynamic message) async {
+    // 假设这里是处理消息的方法
+    await wk.messageManager.putMessageIntoStorage(message);
+    sendPort.send('Processed: $message');
   }
 }
