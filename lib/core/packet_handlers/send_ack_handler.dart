@@ -1,5 +1,5 @@
 import 'package:wkim_flutter_sdk/common/logs.dart';
-import 'package:wkim_flutter_sdk/core/packet_handler_registry.dart';
+import 'package:wkim_flutter_sdk/core/packet_handlers/packet_handler_registry.dart';
 import 'package:wkim_flutter_sdk/proto/packet.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
 

@@ -9,7 +9,7 @@ class DebounceButton extends StatefulWidget {
   final bool isVibrate;
   final HitTestBehavior? behavior;
   // 是否水波纹
-  final bool isCorrugated = false;
+  final bool isCorrugated;
 
   const DebounceButton({
     super.key,
@@ -18,6 +18,7 @@ class DebounceButton extends StatefulWidget {
     required this.child,
     this.isButtonEnable = true,
     this.isVibrate = false,
+    this.isCorrugated = false,
 
     /// 让空白区域也能响应点击事件
     this.behavior = HitTestBehavior.opaque,

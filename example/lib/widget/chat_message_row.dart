@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:wkim_flutter_sdk/type/const.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
-import 'package:wkim_flutter_sdk_example/entity/message.dart';
+import 'package:wkim_flutter_sdk/entity/message.dart';
 import 'package:wkim_flutter_sdk_example/service/http.dart';
 import 'package:wkim_flutter_sdk_example/theme/color.dart';
 import 'package:wkim_flutter_sdk_example/util/adapt.dart';

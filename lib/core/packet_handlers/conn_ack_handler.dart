@@ -1,6 +1,6 @@
 import 'package:wkim_flutter_sdk/common/crypto_utils.dart';
 import 'package:wkim_flutter_sdk/common/logs.dart';
-import 'package:wkim_flutter_sdk/core/packet_handler_registry.dart';
+import 'package:wkim_flutter_sdk/core/packet_handlers/packet_handler_registry.dart';
 import 'package:wkim_flutter_sdk/core/wk_status.dart';
 import 'package:wkim_flutter_sdk/proto/packet.dart';
 import 'package:wkim_flutter_sdk/type/const.dart';
@@ -22,16 +22,16 @@ class ConnAckPacketHandler implements PacketHandler<ConnAckPacket> {
         imStatus: WKConnectStatus.success,
       ));
 
-      try {
-        //   WKIM.shared.conversationManager.setSyncConversation(() {
-        //     setConnectionStatus(WKConnectStatus.syncCompleted);
-        _wk.statusManage.updateStatus(WKConnectStatus.syncCompleted);
+      // try {
+      //   //   WKIM.shared.conversationManager.setSyncConversation(() {
+      //   //     setConnectionStatus(WKConnectStatus.syncCompleted);
+      //   // _wk.statusManage.updateStatus(WKConnectStatus.syncCompleted);
 
-        //     _resendMsg();
-        //   });
-      } catch (e) {
-        Logs.error(e.toString());
-      }
+      //   //     _resendMsg();
+      //   //   });
+      // } catch (e) {
+      //   Logs.error(e.toString());
+      // }
 
       /// 启动心跳检查
       _wk.connectionManager.startHeartTimer();

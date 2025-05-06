@@ -2,9 +2,11 @@ import 'package:chat_bottom_container/chat_bottom_container.dart';
 import 'package:extended_text_field/extended_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:wkim_flutter_sdk_example/message_manager.dart';
+import 'package:wkim_flutter_sdk/common/logs.dart';
+import 'package:wkim_flutter_sdk/type/msg.dart';
+import 'package:wkim_flutter_sdk/wkim.dart';
+import 'package:wkim_flutter_sdk/entity/channel.dart';
 import 'package:wkim_flutter_sdk_example/theme/color.dart';
 import 'package:wkim_flutter_sdk_example/util/adapt.dart';
 import 'package:wkim_flutter_sdk_example/util/emoji.dart';
@@ -78,6 +80,16 @@ class Chat extends StatelessWidget {
                     forceStrutHeight: true,
                   ),
                   onSubmitted: (value) {
+                    Logs.info(value);
+                    WKMessageContent msg = WKMessageContent();
+                    msg.content = value;
+                    msg.contentType = 1;
+                    WKSendOptions o = WKSendOptions();
+                    WKIMCore.shared.messageManager.sendMessage(
+                      msg,
+                      WKChannel(channelId, channelType),
+                      o,
+                    );
                     // focusNode.dispose();
                     // IMUtil.sendTextMessage(
                     //   value,

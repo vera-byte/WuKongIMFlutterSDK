@@ -1,5 +1,5 @@
-import 'package:isar/isar.dart';
 import 'package:wkim_flutter_sdk/type/const.dart';
+import 'package:wkim_flutter_sdk/wkim.dart';
 part 'channel_member.g.dart';
 
 @Collection()

@@ -2,11 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:wkim_flutter_sdk/common/options.dart';
+import 'package:wkim_flutter_sdk/entity/channel.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
-import 'package:wkim_flutter_sdk_example/channel_manager.dart';
-import 'package:wkim_flutter_sdk_example/conversation_manager.dart';
-import 'package:wkim_flutter_sdk_example/db/wk_db.dart';
-import 'package:wkim_flutter_sdk_example/message_manager.dart';
 import 'package:wkim_flutter_sdk_example/pages/conversation/conversation.dart';
 import 'package:wkim_flutter_sdk_example/service/http.dart';
 
@@ -113,23 +110,14 @@ class LoginDemoState extends State<LoginDemo> {
                   }
                   var status = await HttpUtils.login(uidStr, tokenStr);
                   if (status == HttpStatus.ok) {
-                    // WKIMCore.shared.options.getAddr = (Function(String address) complete) async {
-                    //   String ip = await HttpUtils.getIP(uidStr);
-                    //   print(ip);
-                    //   complete(ip);
-                    // };
-                    // WKIMCore.shared.options.getAddr;
                     WKIMCore.shared.setup(
                       WKIMOptions(uidStr, tokenStr, addr: "ws://175.27.245.108:15200"),
-                      initDB: WKDB.shared.init,
-                      bindSDKImplement: (implement) {
-                        // 实现
-                        implement(NotImplementedType.messageManager, DefaultWKMessageManager.shared);
-                        implement(NotImplementedType.channelManager, DefaultWKChannelManager.shared);
-                        implement(NotImplementedType.conversationManager, DefaultWKConversationManager.shared);
+                      init: (_) {
+                        _.networkHandler.registryFetchChannel(HttpUtils.getChannelInfo);
+                        _.networkHandler.registryFetchSyncConversation(HttpUtils.syncConversation);
                       },
                     ).then((_) {
-                      WKIMCore.shared.channelManager.getChannelWithAsync(uidStr, 1, true);
+                      WKIMCore.shared.channelManager.getChannelWithAsync(WKChannel(uidStr, 1), true);
                       WKIMCore.shared.conversationManager.syncConversationToDB();
                       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Conversation()), (Route<dynamic> route) => false);
                     });

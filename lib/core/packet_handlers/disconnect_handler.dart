@@ -1,4 +1,4 @@
-import 'package:wkim_flutter_sdk/core/packet_handler_registry.dart';
+import 'package:wkim_flutter_sdk/core/packet_handlers/packet_handler_registry.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
 
 class DisconnectPacketHandler implements PacketHandler<dynamic> {

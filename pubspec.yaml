@@ -14,9 +14,11 @@ dependencies:
   logger: 2.5.0
   cupertino_icons: ^1.0.6
   web_socket_channel: 3.0.2
-  # 优化项
-  equatable: ^2.0.7 # 阻止未变化的值重新构建
-  rxdart: ^0.27.5 # 优化Stream
+  # dart 高性能数据库
+  isar: 3.1.0+1
+  isar_flutter_libs: 3.1.0+1
+  # 数据库end
+  stream_transform: ^2.1.1
   path_provider: 2.1.5
   uuid: 4.4.2
   x25519: 0.1.1
@@ -37,6 +39,9 @@ dev_dependencies:
     sdk: flutter
   freezed: any
   flutter_lints: ^3.0.0
+  isar_generator: 3.1.0+1
+  json_serializable: any
+  build_runner:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

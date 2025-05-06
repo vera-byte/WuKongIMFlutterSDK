@@ -1,15 +1,15 @@
 import 'dart:convert';
 
-import 'package:isar/isar.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wkim_flutter_sdk/common/logs.dart';
 import 'package:wkim_flutter_sdk/core/interface/message_manager_interface.dart';
 import 'package:wkim_flutter_sdk/proto/packet.dart';
 import 'package:wkim_flutter_sdk/type/const.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
-import 'package:wkim_flutter_sdk_example/db/wk_db.dart';
-import 'package:wkim_flutter_sdk_example/entity/channel.dart';
-import 'package:wkim_flutter_sdk_example/entity/conversation.dart';
-import 'package:wkim_flutter_sdk_example/entity/message.dart';
+import 'package:wkim_flutter_sdk/db/wk_db.dart';
+import 'package:wkim_flutter_sdk/entity/channel.dart';
+import 'package:wkim_flutter_sdk/entity/conversation.dart';
+import 'package:wkim_flutter_sdk/entity/message.dart';
 
 class DefaultWKMessageManager extends WKMessageManager {
   DefaultWKMessageManager._privateConstructor();
@@ -22,7 +22,7 @@ class DefaultWKMessageManager extends WKMessageManager {
   }
 
   @override
-  Future<RecvPacket> saveRecvMsg(RecvPacket recvMsg) async {
+  Future<RecvPacket> saveRecvMessage(RecvPacket recvMsg) async {
     print("用户实现saveRecvMsg");
 
     try {
@@ -32,7 +32,7 @@ class DefaultWKMessageManager extends WKMessageManager {
         ..clientMsgNo = recvMsg.clientMsgNO
         ..timestamp = recvMsg.messageTime
         ..messageSeq = recvMsg.messageSeq
-        ..setting = recvMsg.setting.encode()
+        ..setting = recvMsg.setting
         ..header.syncOnce = recvMsg.header.syncOnce
         ..header.noPersist = recvMsg.header.noPersist
         ..header.redDot = recvMsg.header.showUnread
@@ -72,61 +72,50 @@ class DefaultWKMessageManager extends WKMessageManager {
 
   /// 入库
   @override
-  putMessageIntoStorage(dynamic msg) async {
-    if (msg is WKMessage) {
-      WKConversation conv = await wk.conversationManager.getConversationWithAsync(msg.channelId, msg.channelType);
-      if (msg.channelType == WKChannelType.communityTopic && msg.channelId != '') {
-        if (msg.channelId.contains("@")) {
-          var str = msg.channelId.split("@");
-          conv.parentChannelID = str[0];
-          conv.parentChannelType = WKChannelType.community;
-        }
+  putMessageIntoStorage(msg) async {
+    WKConversation conv = await wk.conversationManager.getConversationWithAsync(msg.channelId, msg.channelType);
+    if (msg.channelType == WKChannelType.communityTopic && msg.channelId != '') {
+      if (msg.channelId.contains("@")) {
+        var str = msg.channelId.split("@");
+        conv.parentChannelID = str[0];
+        conv.parentChannelType = WKChannelType.community;
       }
-      conv.lastMsgTimestamp = msg.timestamp;
-      conv.channelId = msg.channelId;
-      conv.channelType = msg.channelType;
-      conv.lastClientMsgNo = msg.clientMsgNo;
-      conv.lastMsgSeq = msg.messageSeq;
-      conv.unreadCount = msg.readed;
-      // conv.lastMessage.value = msg;
-      WKChannel channel = WKChannel(msg.channelId, msg.channelType);
-      channel = await wk.channelManager.getChannelWithAsync(channel.channelId, channel.channelType, true);
-
-      /// 确定关系
-      conv.channel.value = channel;
-      // if (msg.channelType == WKChannelType.group) {
-      /// 群的时候不一样
-      WKChannel fromChannel = WKChannel(msg.fromUid, 1);
-      fromChannel = await wk.channelManager.getChannelWithAsync(fromChannel.channelId, fromChannel.channelType, true);
-      msg.fromChannel.value = fromChannel;
-      // }
-
-      /// 确定关系
-      msg.channel.value = channel;
-
-      /// 确定关系
-      msg.conversation.value = conv;
-      _isar.writeTxnSync(() {
-        _isar.wKMessages.putByMessageIdStrSync(msg);
-      });
-    } else {
-      Logs.error("消息入库类型错误");
     }
+    conv.lastMsgTimestamp = msg.timestamp;
+    conv.channelId = msg.channelId;
+    conv.channelType = msg.channelType;
+    conv.lastClientMsgNo = msg.clientMsgNo;
+    conv.lastMsgSeq = msg.messageSeq;
+    conv.unreadCount = msg.readed;
+    // conv.lastMessage.value = msg;
+    WKChannel channel = WKChannel(msg.channelId, msg.channelType);
+    channel = await wk.channelManager.getChannelWithAsync(WKChannel(channel.channelId, channel.channelType), true);
+
+    /// 确定关系
+    conv.channel.value = channel;
+    // if (msg.channelType == WKChannelType.group) {
+    /// 群的时候不一样
+    WKChannel fromChannel = WKChannel(msg.fromUid, 1);
+    fromChannel = await wk.channelManager.getChannelWithAsync(WKChannel(fromChannel.channelId, fromChannel.channelType), true);
+    msg.fromChannel.value = fromChannel;
+    // }
+
+    /// 确定关系
+    msg.channel.value = channel;
+
+    /// 确定关系
+    msg.conversation.value = conv;
+    _isar.writeTxnSync(() {
+      _isar.wKMessages.putByMessageIdStrSync(msg);
+    });
   }
 
   @override
-  syncMessage(List msgs) async {
+  syncMessage(msgs) async {
     try {
-      if (msgs is List<WKMessage>) {
-        // final newRecentMsgs = await Future.wait(msgs.map((e) async {
-        //   /// 更新会话
-        //   // super.wk.conversationManager.update(WKConversation(e.channelId, e.channelType));
-        //   return e;
-        // }));
-        _isar.writeTxnSync(() {
-          _isar.wKMessages.putAllByMessageIdStrSync(msgs);
-        });
-      }
+      _isar.writeTxnSync(() {
+        _isar.wKMessages.putAllByMessageIdStrSync(msgs);
+      });
     } catch (e) {
       rethrow;
     }
@@ -164,5 +153,35 @@ class DefaultWKMessageManager extends WKMessageManager {
   /// 监听最后一条消息(会话显示最后条消息)
   Stream<List<WKMessage>>? streamLastMessage(String channelId, int channelType) {
     return _isar.wKMessages.filter().channelIdEqualTo(channelId).channelTypeEqualTo(channelType).sortByTimestampDesc().limit(1).watch();
+  }
+
+  @override
+  String get generateClientMsgNo => "${const Uuid().v4().toString().replaceAll("-", "")}5";
+  @override
+  sendMessage(content, channel, options) async {
+    WKMessage wkMsg = WKMessage();
+    wkMsg.setting = options.setting;
+    wkMsg.header = options.header;
+    // wkMsg.payload = content.toString();
+    wkMsg.topicID = options.topicID;
+    wkMsg.expireTime = options.expire;
+    if (wkMsg.expireTime > 0) {
+      wkMsg.expireTimestamp = wkMsg.timestamp + wkMsg.expireTime;
+    }
+    wkMsg.channelId = channel.channelId;
+    wkMsg.channelType = channel.channelType;
+    wkMsg.fromUid = WKIMCore.shared.options.uid!;
+    wkMsg.contentType = content.contentType;
+    wkMsg.payload.content = content.content;
+    wkMsg.payload.type = content.contentType;
+    // wkMsg.content = _getSendPayload(wkMsg);
+    wkMsg.channel.value = channel;
+    wkMsg.fromChannel.value = wk.channelManager.getChannelWithSync(WKChannel(wkMsg.fromUid, WKChannelType.personal));
+
+    /// 是否不存储
+    if (!options.header.noPersist) {
+      putMessageIntoStorage(wkMsg);
+    }
+    wk.packetSenderManage.sendMessage(wkMsg);
   }
 }

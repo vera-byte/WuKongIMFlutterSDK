@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:wkim_flutter_sdk/common/logs.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
 
-import 'packet_handler_registry.dart';
+import 'packet_handlers/packet_handler_registry.dart';
 
 void dispatchPacket(Uint8List data) {
   final packet = WKIMCore.shared.options.proto.decode(data);

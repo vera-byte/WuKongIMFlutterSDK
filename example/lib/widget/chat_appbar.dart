@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:wkim_flutter_sdk_example/channel_manager.dart';
+import 'package:wkim_flutter_sdk/wkim.dart';
 import 'package:wkim_flutter_sdk_example/theme/color.dart';
 import 'package:wkim_flutter_sdk_example/util/adapt.dart';
 import 'package:wkim_flutter_sdk_example/widget/debounce_button.dart';

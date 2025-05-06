@@ -1,17 +1,23 @@
 import 'package:isar/isar.dart';
+import 'package:wkim_flutter_sdk/proto/proto.dart';
 import 'package:wkim_flutter_sdk/type/const.dart';
-import 'package:wkim_flutter_sdk_example/entity/channel.dart';
-import 'package:wkim_flutter_sdk_example/entity/conversation.dart';
+import 'package:wkim_flutter_sdk/wkim.dart';
+import 'package:wkim_flutter_sdk/entity/channel.dart';
+import 'package:wkim_flutter_sdk/entity/conversation.dart';
 
 part 'message.g.dart';
 
 @Collection()
 @Name(WKDBConst.tableMessage)
 class WKMessage {
-  WKMessage();
+  WKMessage() {
+    clientMsgNo = WKIMCore.shared.messageManager.generateClientMsgNo;
+    timestamp = (DateTime.now().millisecondsSinceEpoch / 1000).truncate();
+  }
+
   Id? id;
 
-  int setting = 0;
+  Setting setting = Setting();
 
   @Index(unique: true)
   String messageIdStr = "";
@@ -73,7 +79,7 @@ class WKMessage {
   factory WKMessage.fromJson(Map<String, dynamic> json) {
     final payload = Payload.fromJson(json['payload'] ?? {});
     return WKMessage()
-      ..setting = json['setting'] ?? 0
+      ..setting = Setting().decode(json['setting'] ?? 0)
       ..messageIdStr = json['message_idstr'] ?? ''
       ..messageSeq = json['message_seq'] ?? 0
       ..clientMsgNo = json['client_msg_no'] ?? ''
@@ -115,6 +121,23 @@ class Header {
         'red_dot': redDot,
         'sync_once': syncOnce,
       };
+}
+
+@embedded
+class Setting {
+  int receipt = 0;
+  int topic = 0;
+  int stream = 0;
+  Setting decode(int v) {
+    receipt = (v >> 7 & 0x01);
+    topic = (v >> 3 & 0x01);
+    stream = (v >> 2 & 0x001);
+    return this;
+  }
+
+  int encode() {
+    return receipt << 7 | topic << 3 | stream << 2;
+  }
 }
 
 @embedded

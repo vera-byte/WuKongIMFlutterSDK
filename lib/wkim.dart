@@ -10,11 +10,23 @@ import 'package:wkim_flutter_sdk/core/interface/cmd_manager_interface.dart';
 import 'package:wkim_flutter_sdk/core/interface/conversation_manager_interface.dart';
 import 'package:wkim_flutter_sdk/core/interface/message_manager_interface.dart';
 import 'package:wkim_flutter_sdk/core/interface/reminder_manager_interface.dart';
-import 'package:wkim_flutter_sdk/core/packet_handler_registry.dart';
+import 'package:wkim_flutter_sdk/core/network_handlers/network_handler_registry.dart';
+import 'package:wkim_flutter_sdk/core/packet_handlers/packet_handler_registry.dart';
 import 'package:wkim_flutter_sdk/core/packet_recipient.dart';
 import 'package:wkim_flutter_sdk/core/packet_sender.dart';
 import 'package:wkim_flutter_sdk/core/wk_module_registry.dart';
 import 'package:wkim_flutter_sdk/core/wk_status.dart';
+import 'package:wkim_flutter_sdk/db/wk_db.dart';
+
+export 'package:wkim_flutter_sdk/core/default/default_message_manager.dart';
+export 'package:wkim_flutter_sdk/core/default/default_channel_manager.dart';
+export 'package:wkim_flutter_sdk/core/default/default_conversation_manager.dart';
+
+/// 导出数据库
+export 'package:isar/isar.dart';
+
+///  导出数据流
+export 'package:stream_transform/stream_transform.dart';
 
 /// 用户自行实现SDK功能
 typedef SDKCoreImplement = void Function(NotImplementedType type, Object instance, {bool override});
@@ -58,6 +70,9 @@ class WKIMCore {
   /// 负责发送 Packet
   final PacketSenderManager packetSenderManage = PacketSenderManager.shared;
 
+  /// 负债网络处理
+  final NetworkHandler networkHandler = NetworkHandler.shared;
+
   /// 负责接收 Packet
   final PacketRecipientManager packetRecipientManager = PacketRecipientManager.shared;
 
@@ -68,9 +83,9 @@ class WKIMCore {
   Future<bool> setup(
     WKIMOptions opts, {
     bool autoConnect = true,
-    void Function(SDKCoreImplement implement)? bindSDKImplement,
-    void Function()? init,
-    required Future<void> Function() initDB,
+    void Function(SDKCoreImplement implement)? customSDKImplement,
+    void Function(WKIMCore self)? init,
+    Future<void> Function()? initDB,
   }) async {
     if (isSetup) {
       Logs.info("已经初始化,无需重复调用");
@@ -79,19 +94,24 @@ class WKIMCore {
     try {
       options = opts;
 
-      await initDB();
-      Logs.debug("初始化悟空数据库成功");
-      if (init != null) {
-        init();
+      if (initDB != null) {
+        await initDB();
+      } else {
+        await WKDB.shared.init();
       }
+      if (init != null) {
+        init(shared);
+      }
+      Logs.debug("初始化悟空数据库成功");
+
       connectionManager = ConnectionManager.shared;
       if (autoConnect) {
         connectionManager.connect();
       }
       PacketHandlerRegistry.registerDefaultHandlers();
 
-      if (bindSDKImplement != null) {
-        bindSDKImplement((type, instance, {bool override = false}) {
+      if (customSDKImplement != null) {
+        customSDKImplement((type, instance, {bool override = false}) {
           // 添加类型安全检查
           switch (type) {
             case NotImplementedType.messageManager:
@@ -127,6 +147,8 @@ class WKIMCore {
           }
           WKModuleRegistry.shared.register(type, instance, override: override);
         });
+      } else {
+        WKModuleRegistry.shared.registerDefault();
       }
       isSetup = true;
       return isSetup;

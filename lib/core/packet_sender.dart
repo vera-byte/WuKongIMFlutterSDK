@@ -2,7 +2,9 @@ import 'dart:collection';
 
 import 'package:wkim_flutter_sdk/common/crypto_utils.dart';
 import 'package:wkim_flutter_sdk/common/logs.dart';
+import 'package:wkim_flutter_sdk/entity/message.dart';
 import 'package:wkim_flutter_sdk/proto/packet.dart';
+import 'package:wkim_flutter_sdk/proto/proto.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
 
 class PacketSenderManager {
@@ -56,5 +58,24 @@ class PacketSenderManager {
     if (!_wk.connectionManager.isReconnection) {
       _wk.connectionManager.ws?.sink.add(data);
     }
+  }
+
+  /// 发送消息
+  sendMessage(WKMessage wkMsg) {
+    SendPacket packet = SendPacket();
+
+    packet.setting = wkMsg.setting;
+    packet.header.noPersist = wkMsg.header.noPersist;
+    packet.header.showUnread = wkMsg.header.redDot;
+    packet.header.syncOnce = wkMsg.header.syncOnce;
+    packet.channelId = wkMsg.channelId;
+    packet.channelType = wkMsg.channelType;
+    packet.clientSeq = wkMsg.messageSeq;
+    packet.clientMsgNO = wkMsg.clientMsgNo;
+    packet.topic = wkMsg.topicID;
+    packet.expire = wkMsg.expireTime;
+    packet.payload = wkMsg.payload.toJson().toString();
+    // _addSendingMsg(packet);
+    _sendPacket(packet);
   }
 }

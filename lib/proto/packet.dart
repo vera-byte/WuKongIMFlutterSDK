@@ -1,4 +1,5 @@
 import 'package:wkim_flutter_sdk/common/crypto_utils.dart';
+import 'package:wkim_flutter_sdk/entity/message.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
 
 import 'proto.dart';

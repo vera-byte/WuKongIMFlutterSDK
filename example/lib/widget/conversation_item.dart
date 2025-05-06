@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:wkim_flutter_sdk_example/conversation_manager.dart';
-import 'package:wkim_flutter_sdk_example/entity/conversation.dart';
+import 'package:wkim_flutter_sdk/entity/conversation.dart';
+import 'package:wkim_flutter_sdk/wkim.dart';
 import 'package:wkim_flutter_sdk_example/pages/chat/chat.dart';
 import 'package:wkim_flutter_sdk_example/service/http.dart';
 import 'package:wkim_flutter_sdk_example/theme/color.dart';
@@ -138,9 +138,10 @@ class ConversationItem extends StatelessWidget {
           )
         ],
       ),
-      child: GestureDetector(
+      child: DebounceButton(
         behavior: HitTestBehavior.translucent,
-        onTap: () {
+        isCorrugated: true,
+        onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -158,8 +159,13 @@ class ConversationItem extends StatelessWidget {
               if (vm == null) return const SizedBox.shrink();
               return Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: 16 * rpx,
-                  vertical: 16 * rpx,
+                  horizontal: 12 * rpx,
+                  vertical: 12 * rpx,
+                ),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Color.fromARGB(115, 242, 243, 245)),
+                  ),
                 ),
                 child: Row(
                   children: [

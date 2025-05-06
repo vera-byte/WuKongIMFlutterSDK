@@ -1,7 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:wkim_flutter_sdk/type/const.dart';
-import 'package:wkim_flutter_sdk_example/entity/conversation.dart';
-import 'package:wkim_flutter_sdk_example/entity/message.dart';
+import 'package:wkim_flutter_sdk/entity/conversation.dart';
+import 'package:wkim_flutter_sdk/entity/message.dart';
 
 part 'channel.g.dart';
 

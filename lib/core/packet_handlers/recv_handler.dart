@@ -1,6 +1,6 @@
 import 'package:wkim_flutter_sdk/common/crypto_utils.dart';
 import 'package:wkim_flutter_sdk/common/logs.dart';
-import 'package:wkim_flutter_sdk/core/packet_handler_registry.dart';
+import 'package:wkim_flutter_sdk/core/packet_handlers/packet_handler_registry.dart';
 import 'package:wkim_flutter_sdk/proto/packet.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
 
@@ -30,7 +30,7 @@ class RecvPacketHandler implements PacketHandler<RecvPacket> {
       Logs.debug(recvMsg.toString());
 
       /// 调用抽象类方法
-      _wk.messageManager.saveRecvMsg(recvMsg);
+      _wk.messageManager.saveRecvMessage(recvMsg);
     }
   }
 }

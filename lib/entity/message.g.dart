@@ -97,7 +97,8 @@ const WKMessageSchema = CollectionSchema(
     r'setting': PropertySchema(
       id: 15,
       name: r'setting',
-      type: IsarType.long,
+      type: IsarType.object,
+      target: r'Setting',
     ),
     r'signalPayload': PropertySchema(
       id: 16,
@@ -378,7 +379,11 @@ const WKMessageSchema = CollectionSchema(
       single: true,
     )
   },
-  embeddedSchemas: {r'Header': HeaderSchema, r'Payload': PayloadSchema},
+  embeddedSchemas: {
+    r'Setting': SettingSchema,
+    r'Header': HeaderSchema,
+    r'Payload': PayloadSchema
+  },
   getId: _wKMessageGetId,
   getLinks: _wKMessageGetLinks,
   attach: _wKMessageAttach,
@@ -401,6 +406,9 @@ int _wKMessageEstimateSize(
       PayloadSchema.estimateSize(
           object.payload, allOffsets[Payload]!, allOffsets);
   bytesCount += 3 + object.searchableWord.length * 3;
+  bytesCount += 3 +
+      SettingSchema.estimateSize(
+          object.setting, allOffsets[Setting]!, allOffsets);
   bytesCount += 3 + object.signalPayload.length * 3;
   bytesCount += 3 + object.topicID.length * 3;
   return bytesCount;
@@ -437,7 +445,12 @@ void _wKMessageSerialize(
   );
   writer.writeLong(offsets[13], object.readed);
   writer.writeString(offsets[14], object.searchableWord);
-  writer.writeLong(offsets[15], object.setting);
+  writer.writeObject<Setting>(
+    offsets[15],
+    allOffsets,
+    SettingSchema.serialize,
+    object.setting,
+  );
   writer.writeString(offsets[16], object.signalPayload);
   writer.writeLong(offsets[17], object.status);
   writer.writeLong(offsets[18], object.timestamp);
@@ -479,7 +492,12 @@ WKMessage _wKMessageDeserialize(
       Payload();
   object.readed = reader.readLong(offsets[13]);
   object.searchableWord = reader.readString(offsets[14]);
-  object.setting = reader.readLong(offsets[15]);
+  object.setting = reader.readObjectOrNull<Setting>(
+        offsets[15],
+        SettingSchema.deserialize,
+        allOffsets,
+      ) ??
+      Setting();
   object.signalPayload = reader.readString(offsets[16]);
   object.status = reader.readLong(offsets[17]);
   object.timestamp = reader.readLong(offsets[18]);
@@ -537,7 +555,12 @@ P _wKMessageDeserializeProp<P>(
     case 14:
       return (reader.readString(offset)) as P;
     case 15:
-      return (reader.readLong(offset)) as P;
+      return (reader.readObjectOrNull<Setting>(
+            offset,
+            SettingSchema.deserialize,
+            allOffsets,
+          ) ??
+          Setting()) as P;
     case 16:
       return (reader.readString(offset)) as P;
     case 17:
@@ -3280,59 +3303,6 @@ extension WKMessageQueryFilter
     });
   }
 
-  QueryBuilder<WKMessage, WKMessage, QAfterFilterCondition> settingEqualTo(
-      int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'setting',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<WKMessage, WKMessage, QAfterFilterCondition> settingGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'setting',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<WKMessage, WKMessage, QAfterFilterCondition> settingLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'setting',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<WKMessage, WKMessage, QAfterFilterCondition> settingBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'setting',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
   QueryBuilder<WKMessage, WKMessage, QAfterFilterCondition>
       signalPayloadEqualTo(
     String value, {
@@ -3829,6 +3799,13 @@ extension WKMessageQueryObject
       return query.object(q, r'payload');
     });
   }
+
+  QueryBuilder<WKMessage, WKMessage, QAfterFilterCondition> setting(
+      FilterQuery<Setting> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'setting');
+    });
+  }
 }
 
 extension WKMessageQueryLinks
@@ -4029,18 +4006,6 @@ extension WKMessageQuerySortBy on QueryBuilder<WKMessage, WKMessage, QSortBy> {
   QueryBuilder<WKMessage, WKMessage, QAfterSortBy> sortBySearchableWordDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'searchableWord', Sort.desc);
-    });
-  }
-
-  QueryBuilder<WKMessage, WKMessage, QAfterSortBy> sortBySetting() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'setting', Sort.asc);
-    });
-  }
-
-  QueryBuilder<WKMessage, WKMessage, QAfterSortBy> sortBySettingDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'setting', Sort.desc);
     });
   }
 
@@ -4287,18 +4252,6 @@ extension WKMessageQuerySortThenBy
     });
   }
 
-  QueryBuilder<WKMessage, WKMessage, QAfterSortBy> thenBySetting() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'setting', Sort.asc);
-    });
-  }
-
-  QueryBuilder<WKMessage, WKMessage, QAfterSortBy> thenBySettingDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'setting', Sort.desc);
-    });
-  }
-
   QueryBuilder<WKMessage, WKMessage, QAfterSortBy> thenBySignalPayload() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'signalPayload', Sort.asc);
@@ -4458,12 +4411,6 @@ extension WKMessageQueryWhereDistinct
     });
   }
 
-  QueryBuilder<WKMessage, WKMessage, QDistinct> distinctBySetting() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'setting');
-    });
-  }
-
   QueryBuilder<WKMessage, WKMessage, QDistinct> distinctBySignalPayload(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -4602,7 +4549,7 @@ extension WKMessageQueryProperty
     });
   }
 
-  QueryBuilder<WKMessage, int, QQueryOperations> settingProperty() {
+  QueryBuilder<WKMessage, Setting, QQueryOperations> settingProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'setting');
     });
@@ -4762,6 +4709,251 @@ extension HeaderQueryFilter on QueryBuilder<Header, Header, QFilterCondition> {
 }
 
 extension HeaderQueryObject on QueryBuilder<Header, Header, QFilterCondition> {}
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+const SettingSchema = Schema(
+  name: r'Setting',
+  id: 2542600759502230801,
+  properties: {
+    r'receipt': PropertySchema(
+      id: 0,
+      name: r'receipt',
+      type: IsarType.long,
+    ),
+    r'stream': PropertySchema(
+      id: 1,
+      name: r'stream',
+      type: IsarType.long,
+    ),
+    r'topic': PropertySchema(
+      id: 2,
+      name: r'topic',
+      type: IsarType.long,
+    )
+  },
+  estimateSize: _settingEstimateSize,
+  serialize: _settingSerialize,
+  deserialize: _settingDeserialize,
+  deserializeProp: _settingDeserializeProp,
+);
+
+int _settingEstimateSize(
+  Setting object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  return bytesCount;
+}
+
+void _settingSerialize(
+  Setting object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeLong(offsets[0], object.receipt);
+  writer.writeLong(offsets[1], object.stream);
+  writer.writeLong(offsets[2], object.topic);
+}
+
+Setting _settingDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = Setting();
+  object.receipt = reader.readLong(offsets[0]);
+  object.stream = reader.readLong(offsets[1]);
+  object.topic = reader.readLong(offsets[2]);
+  return object;
+}
+
+P _settingDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readLong(offset)) as P;
+    case 1:
+      return (reader.readLong(offset)) as P;
+    case 2:
+      return (reader.readLong(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+extension SettingQueryFilter
+    on QueryBuilder<Setting, Setting, QFilterCondition> {
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> receiptEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'receipt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> receiptGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'receipt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> receiptLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'receipt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> receiptBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'receipt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> streamEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'stream',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> streamGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'stream',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> streamLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'stream',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> streamBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'stream',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> topicEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'topic',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> topicGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'topic',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> topicLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'topic',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Setting, Setting, QAfterFilterCondition> topicBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'topic',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension SettingQueryObject
+    on QueryBuilder<Setting, Setting, QFilterCondition> {}
 
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types

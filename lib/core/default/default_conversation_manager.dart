@@ -4,13 +4,11 @@ import 'package:isar/isar.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:wkim_flutter_sdk/common/logs.dart';
 import 'package:wkim_flutter_sdk/core/interface/conversation_manager_interface.dart';
-import 'package:wkim_flutter_sdk/proto/packet.dart';
+import 'package:wkim_flutter_sdk/db/wk_db.dart';
+import 'package:wkim_flutter_sdk/entity/channel.dart';
+import 'package:wkim_flutter_sdk/entity/conversation.dart';
+import 'package:wkim_flutter_sdk/entity/message.dart';
 import 'package:wkim_flutter_sdk/type/const.dart';
-import 'package:wkim_flutter_sdk_example/db/wk_db.dart';
-import 'package:wkim_flutter_sdk_example/entity/channel.dart';
-import 'package:wkim_flutter_sdk_example/entity/conversation.dart';
-import 'package:wkim_flutter_sdk_example/entity/message.dart';
-import 'package:wkim_flutter_sdk_example/service/http.dart';
 
 class ConversationViewModel {
   final WKConversation conversation;
@@ -105,7 +103,8 @@ class DefaultWKConversationManager extends WKConversationManager {
   Future<void> syncConversationToDB() async {
     Logs.debug("消息同步中");
     final lastSsgSeqs = getLastMsgSeqs();
-    HttpUtils.syncConversation(lastSsgSeqs, 20, 0, (cons, recentMsgs) async {
+
+    wk.networkHandler.fetchSyncConversation(lastSsgSeqs, 20, 0, (cons, recentMsgs) async {
       try {
         wk.statusManage.updateStatus(WKConnectStatus.syncMsg);
 

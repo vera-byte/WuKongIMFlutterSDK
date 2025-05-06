@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:wkim_flutter_sdk/common/logs.dart';
+import 'package:wkim_flutter_sdk/entity/message.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
 
 import 'packet.dart';
@@ -36,22 +37,6 @@ enum PacketType {
 
   /// 请求断开连接
   disconnect,
-}
-
-class Setting {
-  int receipt = 0;
-  int topic = 0;
-  int stream = 0;
-  Setting decode(int v) {
-    receipt = (v >> 7 & 0x01);
-    topic = (v >> 3 & 0x01);
-    stream = (v >> 2 & 0x001);
-    return this;
-  }
-
-  int encode() {
-    return receipt << 7 | topic << 3 | stream << 2;
-  }
 }
 
 class Proto {

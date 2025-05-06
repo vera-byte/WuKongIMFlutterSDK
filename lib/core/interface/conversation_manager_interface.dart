@@ -11,4 +11,5 @@ abstract class WKConversationManager {
   Future<void> syncConversationToDB();
   Future<void> update(dynamic conv);
   saveConversationToDB(conv);
+  getLastMsgSeqs();
 }

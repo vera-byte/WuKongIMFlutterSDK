@@ -1,12 +1,11 @@
 import 'dart:io';
 
-import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
-import 'package:wkim_flutter_sdk_example/entity/channel.dart';
-import 'package:wkim_flutter_sdk_example/entity/channel_member.dart';
-import 'package:wkim_flutter_sdk_example/entity/conversation.dart';
-import 'package:wkim_flutter_sdk_example/entity/message.dart';
+import 'package:wkim_flutter_sdk/entity/channel.dart';
+import 'package:wkim_flutter_sdk/entity/channel_member.dart';
+import 'package:wkim_flutter_sdk/entity/conversation.dart';
+import 'package:wkim_flutter_sdk/entity/message.dart';
 
 class WKDB {
   WKDB._privateConstructor();

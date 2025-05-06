@@ -1,4 +1,5 @@
 import 'package:wkim_flutter_sdk/common/logs.dart';
+import 'package:wkim_flutter_sdk/core/default/default_conversation_manager.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
 
 /// 修改后的模块注册表
@@ -16,6 +17,12 @@ class WKModuleRegistry {
     }
     _modules[type] = instance;
     Logs.debug("注册模块 ${instance.runtimeType}");
+  }
+
+  void registerDefault() {
+    register(NotImplementedType.messageManager, DefaultWKMessageManager.shared);
+    register(NotImplementedType.channelManager, DefaultWKChannelManager.shared);
+    register(NotImplementedType.conversationManager, DefaultWKConversationManager.shared);
   }
 
   T get<T>(NotImplementedType type) {

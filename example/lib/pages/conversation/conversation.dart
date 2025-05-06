@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wkim_flutter_sdk/entity/channel.dart';
 import 'package:wkim_flutter_sdk/wkim.dart';
-import 'package:wkim_flutter_sdk_example/conversation_manager.dart';
 import 'package:wkim_flutter_sdk_example/pages/chat/chat.dart';
 import 'package:wkim_flutter_sdk_example/service/http.dart';
 import 'package:wkim_flutter_sdk_example/theme/color.dart';
@@ -118,7 +118,7 @@ class Conversation extends StatelessWidget {
                               if (v.isEmpty) return;
                               Navigator.pop(context);
 
-                              WKIMCore.shared.channelManager.getChannelWithAsync(v, 1, true);
+                              WKIMCore.shared.channelManager.getChannelWithAsync(WKChannel(v, 1), true);
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -199,7 +199,7 @@ class Conversation extends StatelessWidget {
                               Navigator.pop(context);
 
                               HttpUtils.createGroup(v).then((_) {
-                                WKIMCore.shared.channelManager.getChannelWithAsync(v, 2, true);
+                                WKIMCore.shared.channelManager.getChannelWithAsync(WKChannel(v, 2), true);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

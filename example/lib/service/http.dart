@@ -1,14 +1,13 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
-import 'package:wkim_flutter_sdk/type/const.dart';
+import 'package:wkim_flutter_sdk/common/logs.dart';
+
 import 'package:wkim_flutter_sdk/wkim.dart';
 import 'package:wkim_flutter_sdk_example/const.dart';
-import 'package:wkim_flutter_sdk_example/entity/channel.dart';
-import 'package:wkim_flutter_sdk_example/entity/conversation.dart';
-import 'package:wkim_flutter_sdk_example/entity/message.dart';
+import 'package:wkim_flutter_sdk/entity/channel.dart';
+import 'package:wkim_flutter_sdk/entity/conversation.dart';
+import 'package:wkim_flutter_sdk/entity/message.dart';
 
 class HttpUtils {
   // static String apiURL = "https://api.githubim.com";
@@ -253,10 +252,9 @@ class HttpUtils {
   //   return extra;
   // }
 
-  static Future<WKChannel> getChannelInfo(String uid, int channelType) async {
-    var channel = WKChannel(uid, channelType);
-
-    final response = await dio.get('/${channelType == 1 ? "users" : "groups"}/$uid');
+  static Future<WKChannel> getChannelInfo(WKChannel channel) async {
+    Logs.debug("通过网络获取频道资料");
+    final response = await dio.get('/${channel.channelType == 1 ? "users" : "groups"}/${channel.channelId}');
     if (response.statusCode == HttpStatus.ok) {
       var json = response.data;
       channel.channelName = json['name'];
